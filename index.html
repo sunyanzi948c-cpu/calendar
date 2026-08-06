@@ -7,7 +7,6 @@
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>任務管理系統 APP</title>
     <style>
-      /* --- 基礎設定 --- */
       body {
         background-color: #f0f2f5;
         font-family: "Microsoft JhengHei", sans-serif;
@@ -15,7 +14,6 @@
         padding: 0;
         -webkit-tap-highlight-color: transparent;
       }
-
       .header {
         background-color: #2d3748;
         color: white;
@@ -45,12 +43,11 @@
         cursor: pointer;
         font-size: 14px;
       }
-
       .container {
         padding: 15px;
       }
 
-      /* --- 登入畫面 --- */
+      /* 登入畫面 */
       #loginScreen {
         display: flex;
         flex-direction: column;
@@ -70,14 +67,13 @@
         cursor: pointer;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
-
-      /* --- APP 主畫面 (預設隱藏) --- */
       #appScreen {
         display: none;
       }
 
-      /* --- 原本的 UI CSS --- */
-      .input-card {
+      /* 元件 UI */
+      .input-card,
+      .modal-content {
         background: white;
         border-radius: 12px;
         padding: 15px;
@@ -127,10 +123,23 @@
         align-items: center;
         border: 1px solid #e2e8f0;
       }
+      .task-info {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        flex: 1;
+        overflow: hidden;
+      }
       .task-title {
         font-size: 18px;
         font-weight: bold;
         color: #1e293b;
+        cursor: pointer;
+        word-wrap: break-word;
+      }
+      .task-title.completed {
+        text-decoration: line-through;
+        color: #94a3b8;
       }
       .tags {
         display: flex;
@@ -145,6 +154,10 @@
         font-size: 12px;
         font-weight: bold;
       }
+      .tag-time {
+        color: #64748b;
+        font-size: 13px;
+      }
       .actions {
         display: flex;
         gap: 6px;
@@ -156,7 +169,42 @@
         width: 38px;
         height: 38px;
         font-size: 16px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
         cursor: pointer;
+      }
+
+      /* 彈窗 */
+      .modal-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(0, 0, 0, 0.5);
+        z-index: 100;
+        justify-content: center;
+        align-items: center;
+        padding: 15px;
+        box-sizing: border-box;
+      }
+      .modal-content {
+        width: 100%;
+        max-width: 450px;
+        margin: auto;
+      }
+      .modal-title {
+        font-size: 20px;
+        font-weight: bold;
+        color: #2d3748;
+        margin-bottom: 5px;
+      }
+      .btn-cancel {
+        background-color: #e2e8f0;
+        color: #333333;
+        margin-top: 5px;
       }
     </style>
   </head>
@@ -185,6 +233,7 @@
             <option value="一般">一般</option>
             <option value="工作">工作</option>
             <option value="生活">生活</option>
+            <option value="學習">學習</option>
             <option value="健康" selected>健康</option>
           </select>
           <select id="addPriority" style="flex: 1">
@@ -193,6 +242,7 @@
             <option value="低">低</option>
           </select>
         </div>
+        <input type="datetime-local" id="addTime" />
         <button class="btn-main" onclick="addTask()">新增任務</button>
       </div>
 
@@ -200,6 +250,34 @@
         <div style="text-align: center; color: #94a3b8; margin-top: 20px">
           任務將從雲端同步...
         </div>
+      </div>
+    </div>
+
+    <div id="editModal" class="modal-overlay">
+      <div class="modal-content">
+        <div class="modal-title">📝 編輯任務詳情</div>
+        <label style="font-size: 14px; color: #4a5568">任務內容</label>
+        <input type="text" id="editContent" />
+        <div class="row">
+          <select id="editCategory" style="flex: 1">
+            <option value="一般">一般</option>
+            <option value="工作">工作</option>
+            <option value="生活">生活</option>
+            <option value="學習">學習</option>
+            <option value="健康">健康</option>
+          </select>
+          <select id="editPriority" style="flex: 1">
+            <option value="高">高</option>
+            <option value="中">中</option>
+            <option value="低">低</option>
+          </select>
+        </div>
+        <label style="font-size: 14px; color: #4a5568">⏰ 鬧鐘提醒時間</label>
+        <input type="datetime-local" id="editTime" />
+        <button class="btn-main" onclick="saveEdit()">儲存變更</button>
+        <button class="btn-main btn-cancel" onclick="closeEditModal()">
+          取消
+        </button>
       </div>
     </div>
 
@@ -226,120 +304,72 @@
       };
 
       // ==========================================
-      // 🚨 2. 請填入你的 Google Apps Script (GAS) API 網址
+      // 🚨 2. 請填入你「重新部署後」拿到有 /exec 結尾的 GAS 網址
       // ==========================================
       const GAS_API_URL =
-        "https://script.google.com/macros/s/AKfycbzsTMZ8pzjgGLwiygHSUaxZw62s7SefC8LPLk7Z16Xp15WodwtTT13m2heLniETnHCzaA/exec";
+        "https://script.google.com/macros/s/AKfycbwvYsXf_AQ55AanxcjCfYTzsASRgnqMqZltBxqDY_H8zKZ-aeuRDYaNRnxw0r21sXZd/exec";
 
-      // --- 全域變數 ---
       let currentUID = null;
       let tasks = [];
       let currentEditId = null;
 
-      // --- Firebase 初始化 ---
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
 
-      // --- 綁定按鈕事件 (模組化寫法) ---
-      // 登入
-      document.getElementById("btnLogin").addEventListener("click", () => {
-        signInWithPopup(auth, provider).catch((error) =>
-          console.error("登入失敗", error),
-        );
-      });
+      document
+        .getElementById("btnLogin")
+        .addEventListener("click", () => signInWithPopup(auth, provider));
+      document
+        .getElementById("btnLogout")
+        .addEventListener("click", () => signOut(auth));
 
-      // 登出
-      document.getElementById("btnLogout").addEventListener("click", () => {
-        signOut(auth);
-      });
-
-      // 監聽登入狀態改變
       onAuthStateChanged(auth, (user) => {
-        const loginScreen = document.getElementById("loginScreen");
-        const appScreen = document.getElementById("appScreen");
-        const userInfo = document.getElementById("userInfo");
-        const userName = document.getElementById("userName");
-
         if (user) {
-          // 登入成功：顯示畫面並載入雲端資料
-          loginScreen.style.display = "none";
-          appScreen.style.display = "block";
-          userInfo.style.display = "flex";
-          userName.textContent = user.displayName;
-          currentUID = user.uid; // 記住這張身分證
-
-          fetchTasksFromCloud(); // 觸發讀取資料
-
-          // 啟動鬧鐘監聽器
+          document.getElementById("loginScreen").style.display = "none";
+          document.getElementById("appScreen").style.display = "block";
+          document.getElementById("userInfo").style.display = "flex";
+          document.getElementById("userName").textContent = user.displayName;
+          currentUID = user.uid;
+          fetchTasksFromCloud();
           setInterval(checkAlarms, 10000);
         } else {
-          // 未登入：回到登入畫面
-          loginScreen.style.display = "flex";
-          appScreen.style.display = "none";
-          userInfo.style.display = "none";
+          document.getElementById("loginScreen").style.display = "flex";
+          document.getElementById("appScreen").style.display = "none";
+          document.getElementById("userInfo").style.display = "none";
           currentUID = null;
           tasks = [];
         }
       });
 
-      // ==========================================
-      // ☁️ 雲端資料同步邏輯 (與 GAS 溝通)
-      // ==========================================
-
-      // [GET] 讀取任務
       async function fetchTasksFromCloud() {
         if (!currentUID) return;
-
-        // 顯示載入中...
         document.getElementById("taskList").innerHTML =
           '<div style="text-align:center; color:#94A3B8; padding: 20px;">資料同步中，請稍候...</div>';
-
         try {
-          // GET 請求需要把參數帶在網址後面
           const response = await fetch(`${GAS_API_URL}?uid=${currentUID}`);
           const result = await response.json();
-
           if (result.status === "success") {
-            tasks = result.data; // 更新本地陣列
-            renderTasks(); // 渲染畫面
-          } else {
-            console.error("讀取失敗:", result.message);
+            tasks = result.data;
+            renderTasks();
           }
         } catch (error) {
           console.error("連線錯誤:", error);
         }
       }
 
-      // [POST] 新增、修改、刪除的共用函數
       async function syncToCloud(action, payload) {
         if (!currentUID) return;
-
         try {
-          const requestData = {
-            uid: currentUID,
-            action: action, // 'ADD', 'UPDATE', 或 'DELETE'
-            ...payload, // 傳入任務資料或 taskId
-          };
-
-          // 設定 fetch 為 POST 模式，不再會有跨域 (CORS) 阻擋的問題 (GAS 預設允許)
+          const requestData = { uid: currentUID, action: action, ...payload };
           await fetch(GAS_API_URL, {
             method: "POST",
             body: JSON.stringify(requestData),
           });
-
-          // 注意：因為 GAS 的特性，POST 請求可能會收到 no-cors 限制，
-          // 只要 fetch 沒報錯，通常就是寫入成功了。我們採取「樂觀更新」：
-          // 先在本地改陣列並渲染，背後偷偷寫入資料庫，讓操作體驗非常滑順。
         } catch (error) {
           console.error("同步失敗:", error);
-          alert("與伺服器同步失敗，請檢查網路連線！");
         }
       }
-
-      // ==========================================
-      // 🎨 畫面渲染與操作邏輯 (需掛載到 window 供 HTML 呼叫)
-      // ==========================================
 
       const catColors = {
         一般: "#F1F5F9",
@@ -361,36 +391,20 @@
       function renderTasks() {
         const list = document.getElementById("taskList");
         list.innerHTML = "";
-
         if (tasks.length === 0) {
           list.innerHTML =
             '<div style="text-align:center; color:#94A3B8; padding: 20px;">目前沒有任務，快來新增一個吧！</div>';
           return;
         }
-
-        // 排序邏輯
         let sortedTasks = [...tasks].sort((a, b) => {
           const pMap = { 高: 1, 中: 2, 低: 3 };
           if (pMap[a.priority] !== pMap[b.priority])
             return pMap[a.priority] - pMap[b.priority];
-          return Number(b.id) - Number(a.id); // 確保用數字排序
+          return Number(b.id) - Number(a.id);
         });
 
         sortedTasks.forEach((task) => {
           let timeStr = task.time ? task.time.replace("T", " ") : "";
-          let time2Str = task.time2 ? task.time2.replace("T", " ") : "";
-
-          let timeTag = "";
-          if (timeStr) {
-            timeTag += `⏰ ${timeStr}`;
-            if (time2Str) {
-              let t2_only = time2Str.includes(" ")
-                ? time2Str.split(" ")[1]
-                : time2Str;
-              timeTag += ` 🔁 ${t2_only}`;
-            }
-          }
-
           let pIcon =
             task.priority === "高"
               ? "🔥"
@@ -409,7 +423,7 @@
                         <div class="tags">
                             <span class="tag" style="background: ${catColors[task.category]}; color: ${catText[task.category]};">${task.category}</span>
                             <span class="tag" style="background: ${pColors[task.priority]}; color: ${pText[task.priority]};">${pIcon} ${task.priority}</span>
-                            ${timeTag ? `<span class="tag-time">${timeTag}</span>` : ""}
+                            ${timeStr ? `<span class="tag-time">⏰ ${timeStr}</span>` : ""}
                         </div>
                     </div>
                     <div class="actions">
@@ -421,22 +435,19 @@
         });
       }
 
-      // --- 新增任務 ---
       window.addTask = function () {
         const content = document.getElementById("addContent").value.trim();
         if (!content) return alert("請輸入任務內容！");
 
         const newTask = {
-          id: new Date().getTime().toString(), // 用時間戳記當 ID
+          id: new Date().getTime().toString(),
           content: content,
           category: document.getElementById("addCategory").value,
           priority: document.getElementById("addPriority").value,
           time: document.getElementById("addTime").value,
-          time2: "", // 新增時暫不處理再次提醒
           is_completed: false,
         };
 
-        // 樂觀更新：先寫入本地畫面，再偷偷傳給後端
         tasks.push(newTask);
         renderTasks();
         document.getElementById("addContent").value = "";
@@ -445,39 +456,33 @@
         syncToCloud("ADD", { task: newTask });
       };
 
-      // --- 刪除任務 ---
       window.deleteTask = function (id) {
-        if (confirm("確定要刪除這筆任務嗎？")) {
+        if (confirm("確定要刪除嗎？")) {
           tasks = tasks.filter((t) => t.id !== id);
           renderTasks();
           syncToCloud("DELETE", { taskId: id });
         }
       };
 
-      // --- 切換完成狀態 ---
       window.toggleComplete = function (id) {
         let task = tasks.find((t) => t.id === id);
         if (task) {
           task.is_completed = !task.is_completed;
           renderTasks();
-          // 只更新必要的欄位
           syncToCloud("UPDATE", {
             task: { id: id, is_completed: task.is_completed },
           });
         }
       };
 
-      // --- 編輯功能 ---
       window.openEditModal = function (id) {
         let task = tasks.find((t) => t.id === id);
         if (!task) return;
-
         currentEditId = id;
         document.getElementById("editContent").value = task.content;
         document.getElementById("editCategory").value = task.category;
         document.getElementById("editPriority").value = task.priority;
         document.getElementById("editTime").value = task.time;
-
         document.getElementById("editModal").style.display = "flex";
       };
 
@@ -493,34 +498,23 @@
           task.category = document.getElementById("editCategory").value;
           task.priority = document.getElementById("editPriority").value;
           task.time = document.getElementById("editTime").value;
-
           renderTasks();
           syncToCloud("UPDATE", { task: task });
         }
         closeEditModal();
       };
 
-      // --- 鬧鐘背景監聽器 ---
       function checkAlarms() {
         let now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         let currentLocalTime = now.toISOString().slice(0, 16);
-
         tasks.forEach((task) => {
-          let matchTime1 = task.time === currentLocalTime;
-          let matchTime2 = task.time2 === currentLocalTime;
-
-          if (!task.is_completed && (matchTime1 || matchTime2)) {
+          if (!task.is_completed && task.time === currentLocalTime) {
             if (!task.alarm_triggered) {
-              alert(
-                `⏰ 任務提醒時間到！\n─────────────────\n任務：${task.content}\n─────────────────\n請即時處理。`,
-              );
+              alert(`⏰ 任務提醒：\n${task.content}\n請即時處理。`);
               task.alarm_triggered = true;
             }
-          } else if (
-            task.time !== currentLocalTime &&
-            task.time2 !== currentLocalTime
-          ) {
+          } else if (task.time !== currentLocalTime) {
             task.alarm_triggered = false;
           }
         });
