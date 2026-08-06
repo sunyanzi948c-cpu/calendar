@@ -196,17 +196,13 @@
 
         // 初始化設定時間
         window.onload = function() {
-            setLocalTime('addTime');
+            
             renderTasks();
             // 啟動鬧鐘監聽器 (每 10 秒檢查一次)
             setInterval(checkAlarms, 10000); 
         };
 
-        function setLocalTime(elementId) {
-            let now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            document.getElementById(elementId).value = now.toISOString().slice(0,16);
-        }
+       
 
         // --- 2. 畫面渲染功能 ---
         function renderTasks() {
