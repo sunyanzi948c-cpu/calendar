@@ -1,333 +1,271 @@
-<!DOCTYPE html>
+<!doctype html>
 <html lang="zh-TW">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <head>
+    <meta charset="UTF-8" />
+    <meta
+      name="viewport"
+      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>任務管理系統 APP</title>
     <style>
-        /* --- 基礎設定 --- */
-        body {
-            background-color: #F0F2F5;
-            font-family: 'Microsoft JhengHei', sans-serif;
-            margin: 0;
-            padding: 0;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        .header {
-            background-color: #2D3748;
-            color: white;
-            padding: 18px 20px;
-            font-size: 22px;
-            font-weight: bold;
-            position: sticky;
-            top: 0;
-            z-index: 50;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        }
+      /* --- 基礎設定 --- */
+      body {
+        background-color: #f0f2f5;
+        font-family: "Microsoft JhengHei", sans-serif;
+        margin: 0;
+        padding: 0;
+        -webkit-tap-highlight-color: transparent;
+      }
 
-        .container { padding: 15px; }
+      .header {
+        background-color: #2d3748;
+        color: white;
+        padding: 18px 20px;
+        font-size: 20px;
+        font-weight: bold;
+        position: sticky;
+        top: 0;
+        z-index: 50;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+      }
+      .user-info {
+        font-size: 14px;
+        font-weight: normal;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+      .btn-logout {
+        background: #e53e3e;
+        color: white;
+        border: none;
+        padding: 5px 10px;
+        border-radius: 6px;
+        cursor: pointer;
+        font-size: 14px;
+      }
 
-        /* --- 輸入區與表單元件 --- */
-        .input-card, .modal-content {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.05);
-            display: flex;
-            flex-direction: column;
-            gap: 12px;
-        }
+      .container {
+        padding: 15px;
+      }
 
-        input[type="text"], input[type="datetime-local"], select {
-            width: 100%;
-            padding: 12px;
-            border: 1px solid #D1D5DB;
-            border-radius: 8px;
-            font-size: 16px;
-            font-family: inherit;
-            box-sizing: border-box;
-            background-color: #F8FAFC;
-            color: #333;
-        }
+      /* --- 登入畫面 --- */
+      #loginScreen {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        height: 70vh;
+        text-align: center;
+      }
+      .btn-google {
+        background-color: #4285f4;
+        color: white;
+        border: none;
+        padding: 12px 24px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+      }
 
-        .row { display: flex; gap: 10px; }
+      /* --- APP 主畫面 (預設隱藏) --- */
+      #appScreen {
+        display: none;
+      }
 
-        .btn-main {
-            background-color: #4A5568;
-            color: white;
-            border: none;
-            padding: 14px;
-            border-radius: 8px;
-            font-size: 18px;
-            font-weight: bold;
-            width: 100%;
-            cursor: pointer;
-        }
-
-        /* --- 任務列表 --- */
-        .task-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px;}
-
-        .task-card {
-            background: white;
-            border-radius: 12px;
-            padding: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            border: 1px solid #E2E8F0;
-        }
-
-        .task-info { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden;}
-        
-        .task-title {
-            font-size: 18px;
-            font-weight: bold;
-            color: #1E293B;
-            cursor: pointer;
-            word-wrap: break-word;
-        }
-        /* 完成狀態的樣式 */
-        .task-title.completed {
-            text-decoration: line-through;
-            color: #94A3B8;
-        }
-
-        .tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; }
-        .tag { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
-        .tag-time { color: #64748B; font-size: 13px; }
-
-        .actions { display: flex; gap: 6px; }
-        .actions button {
-            background: #F8FAFC; border: none; border-radius: 8px;
-            width: 38px; height: 38px; font-size: 16px;
-            display: flex; align-items: center; justify-content: center; cursor: pointer;
-        }
-
-        /* --- 彈窗 (Modal) 設定 --- */
-        .modal-overlay {
-            display: none; /* 預設隱藏 */
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0, 0, 0, 0.5);
-            z-index: 100;
-            justify-content: center;
-            align-items: center;
-            padding: 15px;
-            box-sizing: border-box;
-        }
-
-        .modal-content {
-            width: 100%;
-            max-width: 450px;
-            margin: auto;
-        }
-
-        .modal-title { font-size: 20px; font-weight: bold; color: #2D3748; margin-bottom: 5px; }
-        .btn-cancel { background-color: #E2E8F0; color: #333333; margin-top: 5px; }
-
+      /* --- 原本的 UI CSS --- */
+      .input-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+      }
+      input[type="text"],
+      input[type="datetime-local"],
+      select {
+        width: 100%;
+        padding: 12px;
+        border: 1px solid #d1d5db;
+        border-radius: 8px;
+        font-size: 16px;
+        box-sizing: border-box;
+        background-color: #f8fafc;
+        color: #333;
+      }
+      .row {
+        display: flex;
+        gap: 10px;
+      }
+      .btn-main {
+        background-color: #4a5568;
+        color: white;
+        border: none;
+        padding: 14px;
+        border-radius: 8px;
+        font-size: 18px;
+        font-weight: bold;
+        cursor: pointer;
+      }
+      .task-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 20px;
+      }
+      .task-card {
+        background: white;
+        border-radius: 12px;
+        padding: 15px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border: 1px solid #e2e8f0;
+      }
+      .task-title {
+        font-size: 18px;
+        font-weight: bold;
+        color: #1e293b;
+      }
+      .tags {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 8px;
+        align-items: center;
+        margin-top: 8px;
+      }
+      .tag {
+        padding: 4px 10px;
+        border-radius: 12px;
+        font-size: 12px;
+        font-weight: bold;
+      }
+      .actions {
+        display: flex;
+        gap: 6px;
+      }
+      .actions button {
+        background: #f8fafc;
+        border: none;
+        border-radius: 8px;
+        width: 38px;
+        height: 38px;
+        font-size: 16px;
+        cursor: pointer;
+      }
     </style>
-</head>
-<body>
-
-    <div class="header">任務管理系統</div>
-
-    <div class="container">
-        <div class="input-card">
-            <input type="text" id="addContent" placeholder="新增任務...">
-            <div class="row">
-                <select id="addCategory" style="flex: 1;">
-                    <option value="一般">一般</option>
-                    <option value="工作">工作</option>
-                    <option value="生活">生活</option>
-                    <option value="學習">學習</option>
-                    <option value="健康">健康</option>
-                </select>
-                <select id="addPriority" style="flex: 1;">
-                    <option value="高">高</option>
-                    <option value="中" selected>中</option>
-                    <option value="低">低</option>
-                </select>
-            </div>
-            <input type="datetime-local" id="addTime">
-            <button class="btn-main" onclick="addTask()">新增任務</button>
-        </div>
-
-        <div class="task-list" id="taskList">
-            </div>
+  </head>
+  <body>
+    <div class="header">
+      <span>任務管理系統</span>
+      <div class="user-info" id="userInfo" style="display: none">
+        <span id="userName"></span>
+        <button class="btn-logout" id="btnLogout">登出</button>
+      </div>
     </div>
 
-    <div id="editModal" class="modal-overlay">
-        <div class="modal-content">
-            <div class="modal-title">📝 編輯任務詳情</div>
-            
-            <label style="font-size: 14px; color: #4A5568;">任務內容</label>
-            <input type="text" id="editContent">
-            
-            <div class="row">
-                <select id="editCategory" style="flex: 1;">
-                    <option value="一般">一般</option><option value="工作">工作</option>
-                    <option value="生活">生活</option><option value="學習">學習</option><option value="健康">健康</option>
-                </select>
-                <select id="editPriority" style="flex: 1;">
-                    <option value="高">高</option><option value="中">中</option><option value="低">低</option>
-                </select>
-            </div>
-
-            <label style="font-size: 14px; color: #4A5568;">⏰ 鬧鐘提醒時間 (留空白即為關閉)</label>
-            <input type="datetime-local" id="editTime">
-
-            <button class="btn-main" onclick="saveEdit()">儲存變更</button>
-            <button class="btn-main btn-cancel" onclick="closeEditModal()">取消</button>
-        </div>
+    <div class="container" id="loginScreen">
+      <h2>歡迎使用</h2>
+      <p style="color: #64748b; margin-bottom: 30px">
+        請先登入以同步您的任務資料
+      </p>
+      <button class="btn-google" id="btnLogin">🔑 使用 Google 帳號登入</button>
     </div>
 
-    <script>
-        // --- 1. 資料庫模擬 ---
-        // 未來這裡的資料會透過 fetch() 從 Flask 取得
-        let tasks = []; 
-        let currentEditId = null; // 紀錄目前正在編輯的任務 ID
-        let taskIdCounter = 1;
+    <div class="container" id="appScreen">
+      <div class="input-card">
+        <input type="text" id="addContent" placeholder="新增任務..." />
+        <div class="row">
+          <select id="addCategory" style="flex: 1">
+            <option value="一般">一般</option>
+            <option value="工作">工作</option>
+            <option value="生活">生活</option>
+            <option value="健康" selected>健康</option>
+          </select>
+          <select id="addPriority" style="flex: 1">
+            <option value="高">高</option>
+            <option value="中" selected>中</option>
+            <option value="低">低</option>
+          </select>
+        </div>
+        <button class="btn-main" onclick="alert('準備串接 GAS 後端！')">
+          新增任務
+        </button>
+      </div>
 
-        // 顏色設定字典 (移植自 Python)
-        const catColors = {"一般": "#F1F5F9", "工作": "#E0F2FE", "生活": "#FEF3C7", "學習": "#F3E8FF", "健康": "#DCFCE7"};
-        const catText = {"一般": "#475569", "工作": "#0369A1", "生活": "#B45309", "學習": "#7E22CE", "健康": "#15803D"};
-        const pColors = {"高": "#FEE2E2", "中": "#FFEDD5", "低": "#F0FDF4"};
-        const pText = {"高": "#B91C1C", "中": "#C2410C", "低": "#15803D"};
+      <div class="task-list" id="taskList">
+        <div style="text-align: center; color: #94a3b8; margin-top: 20px">
+          任務將從雲端同步...
+        </div>
+      </div>
+    </div>
 
-        // 初始化設定時間
-        window.onload = function() {
-            
-            renderTasks();
-            // 啟動鬧鐘監聽器 (每 10 秒檢查一次)
-            setInterval(checkAlarms, 10000); 
-        };
+    <script type="module">
+      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+      import {
+        getAuth,
+        signInWithPopup,
+        GoogleAuthProvider,
+        signOut,
+        onAuthStateChanged,
+      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-       
+      // ⚠️ 請將以下替換成你在 Step 3 複製出來的 firebaseConfig
+      const firebaseConfig = {
+        apiKey: "AIzaSyDSFt_TgniiOuv3_y-A62hSZ_q-cxGx90U",
+        authDomain: "calendar-400ce.firebaseapp.com",
+        projectId: "calendar-400ce",
+        storageBucket: "calendar-400ce.firebasestorage.app",
+        messagingSenderId: "965942149317",
+        appId: "1:965942149317:web:ccef715420c0f5a12e70ac",
+      };
 
-        // --- 2. 畫面渲染功能 ---
-        function renderTasks() {
-            const list = document.getElementById('taskList');
-            list.innerHTML = ''; // 清空現有列表
+      // 初始化 Firebase
+      const app = initializeApp(firebaseConfig);
+      const auth = getAuth(app);
+      const provider = new GoogleAuthProvider();
 
-            // 排序：高優先級在前面，新的在前面
-            let sortedTasks = [...tasks].sort((a, b) => {
-                const pMap = {"高": 1, "中": 2, "低": 3};
-                if (pMap[a.priority] !== pMap[b.priority]) return pMap[a.priority] - pMap[b.priority];
-                return b.id - a.id;
-            });
+      // 綁定按鈕事件
+      document.getElementById("btnLogin").addEventListener("click", () => {
+        signInWithPopup(auth, provider).catch((error) =>
+          console.error("登入失敗", error),
+        );
+      });
 
-            sortedTasks.forEach(task => {
-                // 處理時間顯示格式 (將 T 換成空白)
-                let timeStr = task.time ? task.time.replace('T', ' ') : "";
-                
-                let pIcon = task.priority === "高" ? "🔥" : (task.priority === "中" ? "⚡" : "🌱");
-                let titleClass = task.is_completed ? "task-title completed" : "task-title";
+      document.getElementById("btnLogout").addEventListener("click", () => {
+        signOut(auth);
+      });
 
-                const card = document.createElement('div');
-                card.className = 'task-card';
-                card.innerHTML = `
-                    <div class="task-info">
-                        <div class="${titleClass}" onclick="toggleComplete(${task.id})">${task.content}</div>
-                        <div class="tags">
-                            <span class="tag" style="background: ${catColors[task.category]}; color: ${catText[task.category]};">${task.category}</span>
-                            <span class="tag" style="background: ${pColors[task.priority]}; color: ${pText[task.priority]};">${pIcon} ${task.priority}</span>
-                            ${timeStr ? `<span class="tag-time">⏰ ${timeStr}</span>` : ""}
-                        </div>
-                    </div>
-                    <div class="actions">
-                        <button onclick="openEditModal(${task.id})">✏️</button>
-                        <button onclick="deleteTask(${task.id})" style="color:#E53E3E;">🗑️</button>
-                    </div>
-                `;
-                list.appendChild(card);
-            });
+      // 監聽登入狀態改變
+      onAuthStateChanged(auth, (user) => {
+        const loginScreen = document.getElementById("loginScreen");
+        const appScreen = document.getElementById("appScreen");
+        const userInfo = document.getElementById("userInfo");
+        const userName = document.getElementById("userName");
+
+        if (user) {
+          // 登入成功：顯示任務畫面與使用者名稱
+          loginScreen.style.display = "none";
+          appScreen.style.display = "block";
+          userInfo.style.display = "flex";
+          userName.textContent = user.displayName;
+
+          // 【未來開發重點】
+          // 這裡拿到的 user.uid 就是該使用者的身分證！
+          // 之後我們會把這個 UID 跟任務資料一起丟給 Google Apps Script。
+          console.log("目前使用者的 UID 是:", user.uid);
+        } else {
+          // 未登入或已登出：顯示登入畫面
+          loginScreen.style.display = "flex";
+          appScreen.style.display = "none";
+          userInfo.style.display = "none";
         }
-
-        // --- 3. 核心功能：新增、刪除、完成 ---
-        function addTask() {
-            const content = document.getElementById('addContent').value.trim();
-            if (!content) return alert("請輸入任務內容！");
-
-            const newTask = {
-                id: taskIdCounter++,
-                content: content,
-                category: document.getElementById('addCategory').value,
-                priority: document.getElementById('addPriority').value,
-                time: document.getElementById('addTime').value, // 格式: YYYY-MM-DDTHH:mm
-                is_completed: false
-            };
-
-            tasks.push(newTask);
-            document.getElementById('addContent').value = ''; // 清空輸入框
-            renderTasks();
-        }
-
-        function deleteTask(id) {
-            if (confirm("確定要刪除這筆任務嗎？")) {
-                tasks = tasks.filter(t => t.id !== id);
-                renderTasks();
-            }
-        }
-
-        function toggleComplete(id) {
-            let task = tasks.find(t => t.id === id);
-            if(task) {
-                task.is_completed = !task.is_completed;
-                renderTasks();
-            }
-        }
-
-        // --- 4. 編輯彈窗功能 ---
-        function openEditModal(id) {
-            let task = tasks.find(t => t.id === id);
-            if(!task) return;
-
-            currentEditId = id;
-            document.getElementById('editContent').value = task.content;
-            document.getElementById('editCategory').value = task.category;
-            document.getElementById('editPriority').value = task.priority;
-            document.getElementById('editTime').value = task.time;
-            
-            document.getElementById('editModal').style.display = 'flex';
-        }
-
-        function closeEditModal() {
-            document.getElementById('editModal').style.display = 'none';
-            currentEditId = null;
-        }
-
-        function saveEdit() {
-            let task = tasks.find(t => t.id === currentEditId);
-            if(task) {
-                task.content = document.getElementById('editContent').value.trim();
-                task.category = document.getElementById('editCategory').value;
-                task.priority = document.getElementById('editPriority').value;
-                task.time = document.getElementById('editTime').value;
-            }
-            closeEditModal();
-            renderTasks();
-        }
-
-        // --- 5. 鬧鐘背景監聽器 ---
-        function checkAlarms() {
-            let now = new Date();
-            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-            let currentLocalTime = now.toISOString().slice(0,16); // 取得當下的 YYYY-MM-DDTHH:mm
-
-            tasks.forEach(task => {
-                // 如果任務未完成，且設定時間等於系統當下時間
-                if (!task.is_completed && task.time === currentLocalTime) {
-                    // 防止同一分鐘內重複提醒，加上一個標記
-                    if (!task.alarm_triggered) {
-                        alert(`⏰ 任務提醒時間到！\n─────────────────\n任務：${task.content}\n─────────────────\n請即時處理。`);
-                        task.alarm_triggered = true; // 標記已提醒
-                    }
-                } else if (task.time !== currentLocalTime) {
-                    // 若時間過了，重置標記，為了測試方便
-                    task.alarm_triggered = false; 
-                }
-            });
-        }
+      });
     </script>
-</body>
+  </body>
 </html>
