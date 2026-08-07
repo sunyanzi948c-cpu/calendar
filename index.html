@@ -21,7 +21,7 @@
       .header {
         background-color: #2d3748;
         color: white;
-        padding: 18px 20px;
+        padding: 12px 15px;
         font-size: 20px;
         font-weight: bold;
         position: sticky;
@@ -30,13 +30,25 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
+        flex-wrap: wrap; /* 💡 關鍵 1：橫向空間不夠時，允許自動換行到下一排 */
+        gap: 10px;
       }
+
+      .header > span {
+        white-space: nowrap; /* 💡 關鍵 2：強制標題（任務管理系統）絕不折行 */
+      }
+
       .user-info {
         font-size: 14px;
         font-weight: normal;
         display: flex;
         align-items: center;
         gap: 8px;
+        flex-wrap: wrap; /* 💡 關鍵 3：按鈕太多時，也允許按鈕區塊內部換行 */
+      }
+
+      #userName {
+        white-space: nowrap; /* 💡 關鍵 4：強制你的名字絕不折行 */
       }
 
       .btn-sync {
