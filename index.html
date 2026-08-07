@@ -577,17 +577,18 @@
         document.getElementById("editCategory").value = task.category;
         document.getElementById("editPriority").value = task.priority;
 
-        // 👇 修正點 1：將空格替換回 'T'，datetime-local 才能正確顯示
-        document.getElementById("editTime").value = task.time
-          ? task.time.replace(" ", "T")
+        // 👇 終極時間格式修正：強制截斷到 16 位數並補上 'T'
+        let formattedTime = task.time
+          ? task.time.substring(0, 16).replace(" ", "T")
           : "";
+        document.getElementById("editTime").value = formattedTime;
 
         let time2Mins = "10";
         let isTime2Enabled = false;
         if (task.time && task.time2) {
-          // 👇 確保 new Date 計算時也能正確讀取
-          let t1 = new Date(task.time.replace(" ", "T"));
-          let t2 = new Date(task.time2.replace(" ", "T"));
+          // 計算再次提醒的分鐘數時，也同樣做截斷處理確保計算正確
+          let t1 = new Date(task.time.substring(0, 16).replace(" ", "T"));
+          let t2 = new Date(task.time2.substring(0, 16).replace(" ", "T"));
           let diff = Math.round((t2 - t1) / 60000);
           if (diff > 0 && [5, 10, 15, 30, 60].includes(diff)) {
             time2Mins = diff.toString();
