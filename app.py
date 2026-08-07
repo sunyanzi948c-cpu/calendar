@@ -270,9 +270,14 @@ class TodoApp(ctk.CTk):
         self.header = ctk.CTkFrame(self, fg_color="#2D3748", height=85, corner_radius=0)
         self.header.pack(fill="x")
         ctk.CTkLabel(self.header, text="任務管理中心 (雲端同步中)", font=("Microsoft JhengHei", 24, "bold"), text_color="white").place(relx=0.05, rely=0.5, anchor="w")
-        ctk.CTkButton(self.header, text="🔄 同步", width=70, fg_color="#4A5568", command=self.fetch_tasks).place(relx=0.72, rely=0.5, anchor="e")
-        ctk.CTkButton(self.header, text="⚙️ 切換帳號", width=110, fg_color="#4A5568", command=self.change_uid).place(relx=0.82, rely=0.5, anchor="e")
-        ctk.CTkButton(self.header, text="📥 縮小", width=70, fg_color="#4A5568", command=self.minimize_to_tray).place(relx=0.95, rely=0.5, anchor="e")
+
+        # 👇 建立一個透明容器，讓裡面的按鈕自動橫向排列 👇
+        btn_group = ctk.CTkFrame(self.header, fg_color="transparent")
+        btn_group.place(relx=0.97, rely=0.5, anchor="e")
+
+        ctk.CTkButton(btn_group, text="🔄 同步", width=70, fg_color="#4A5568", command=self.fetch_tasks).pack(side="left", padx=5)
+        ctk.CTkButton(btn_group, text="⚙️ 切換帳號", width=110, fg_color="#4A5568", command=self.change_uid).pack(side="left", padx=5)
+        ctk.CTkButton(btn_group, text="📥 縮小", width=70, fg_color="#4A5568", command=self.minimize_to_tray).pack(side="left", padx=5)
 
         # 輸入區 (完整加入日期與時間選擇器)
         self.input_card = ctk.CTkFrame(self, fg_color="white", border_width=1, border_color="#E2E8F0")
