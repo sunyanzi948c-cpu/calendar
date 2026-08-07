@@ -1,5 +1,5 @@
 // 👇 注意這裡：把 v1 改成了 v2！未來如果有大更新，就改成 v3、v4...
-const CACHE_NAME = 'todo-pwa-v2'; 
+const CACHE_NAME = 'todo-pwa-v3'; 
 const urlsToCache = [
   './',
   './index.html',
