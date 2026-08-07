@@ -1,423 +1,225 @@
-<!doctype html>
+<!DOCTYPE html>
 <html lang="zh-TW">
-  <head>
-    <meta charset="UTF-8" />
-    <meta
-      name="viewport"
-      content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>任務管理系統 APP</title>
     <style>
-      body {
-        background-color: #f0f2f5;
-        font-family: "Microsoft JhengHei", sans-serif;
-        margin: 0;
-        padding: 0;
-        -webkit-tap-highlight-color: transparent;
-      }
-      .header {
-        background-color: #2d3748;
-        color: white;
-        padding: 18px 20px;
-        font-size: 20px;
-        font-weight: bold;
-        position: sticky;
-        top: 0;
-        z-index: 50;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      .user-info {
-        font-size: 14px;
-        font-weight: normal;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-      }
-      .btn-logout {
-        background: #e53e3e;
-        color: white;
-        border: none;
-        padding: 5px 10px;
-        border-radius: 6px;
-        cursor: pointer;
-        font-size: 14px;
-      }
-      .container {
-        padding: 15px;
-      }
+        body { background-color: #F0F2F5; font-family: 'Microsoft JhengHei', sans-serif; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent;}
+        
+        .header { background-color: #2D3748; color: white; padding: 18px 20px; font-size: 20px; font-weight: bold; position: sticky; top: 0; z-index: 50; display: flex; justify-content: space-between; align-items: center;}
+        .user-info { font-size: 14px; font-weight: normal; display: flex; align-items: center; gap: 8px; }
+        
+        /* 新增：同步碼按鈕樣式 */
+        .btn-sync { background: #3182CE; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; font-weight: bold; }
+        .btn-sync:hover { background: #2B6CB0; }
+        
+        .btn-logout { background: #E53E3E; color: white; border: none; padding: 6px 12px; border-radius: 6px; cursor: pointer; font-size: 13px; }
+        
+        .container { padding: 15px; }
 
-      /* 登入畫面 */
-      #loginScreen {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        height: 70vh;
-        text-align: center;
-      }
-      .btn-google {
-        background-color: #4285f4;
-        color: white;
-        border: none;
-        padding: 12px 24px;
-        border-radius: 8px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-      }
-      #appScreen {
-        display: none;
-      }
+        /* 登入畫面 */
+        #loginScreen { display: flex; flex-direction: column; align-items: center; justify-content: center; height: 70vh; text-align: center; }
+        .btn-google { background-color: #4285F4; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        #appScreen { display: none; }
 
-      /* 元件 UI */
-      .input-card,
-      .modal-content {
-        background: white;
-        border-radius: 12px;
-        padding: 15px;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-      }
-      input[type="text"],
-      input[type="datetime-local"],
-      select {
-        width: 100%;
-        padding: 12px;
-        border: 1px solid #d1d5db;
-        border-radius: 8px;
-        font-size: 16px;
-        box-sizing: border-box;
-        background-color: #f8fafc;
-        color: #333;
-      }
-      .row {
-        display: flex;
-        gap: 10px;
-      }
-      .btn-main {
-        background-color: #4a5568;
-        color: white;
-        border: none;
-        padding: 14px;
-        border-radius: 8px;
-        font-size: 18px;
-        font-weight: bold;
-        cursor: pointer;
-      }
-      .task-list {
-        display: flex;
-        flex-direction: column;
-        gap: 12px;
-        margin-top: 20px;
-      }
-      .task-card {
-        background: white;
-        border-radius: 12px;
-        padding: 15px;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        border: 1px solid #e2e8f0;
-      }
-      .task-info {
-        display: flex;
-        flex-direction: column;
-        gap: 8px;
-        flex: 1;
-        overflow: hidden;
-      }
-      .task-title {
-        font-size: 18px;
-        font-weight: bold;
-        color: #1e293b;
-        cursor: pointer;
-        word-wrap: break-word;
-      }
-      .task-title.completed {
-        text-decoration: line-through;
-        color: #94a3b8;
-      }
-      .tags {
-        display: flex;
-        flex-wrap: wrap;
-        gap: 8px;
-        align-items: center;
-        margin-top: 8px;
-      }
-      .tag {
-        padding: 4px 10px;
-        border-radius: 12px;
-        font-size: 12px;
-        font-weight: bold;
-      }
-      .tag-time {
-        color: #64748b;
-        font-size: 13px;
-      }
-      .actions {
-        display: flex;
-        gap: 6px;
-      }
-      .actions button {
-        background: #f8fafc;
-        border: none;
-        border-radius: 8px;
-        width: 38px;
-        height: 38px;
-        font-size: 16px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        cursor: pointer;
-      }
+        /* 元件 UI */
+        .input-card, .modal-content { background: white; border-radius: 12px; padding: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); display: flex; flex-direction: column; gap: 12px; }
+        input[type="text"], input[type="datetime-local"], select { width: 100%; padding: 12px; border: 1px solid #D1D5DB; border-radius: 8px; font-size: 16px; box-sizing: border-box; background-color: #F8FAFC; color: #333; }
+        .row { display: flex; gap: 10px; }
+        .btn-main { background-color: #4A5568; color: white; border: none; padding: 14px; border-radius: 8px; font-size: 18px; font-weight: bold; cursor: pointer; }
+        .task-list { display: flex; flex-direction: column; gap: 12px; margin-top: 20px;}
+        .task-card { background: white; border-radius: 12px; padding: 15px; display: flex; justify-content: space-between; align-items: center; border: 1px solid #E2E8F0; }
+        .task-info { display: flex; flex-direction: column; gap: 8px; flex: 1; overflow: hidden;}
+        .task-title { font-size: 18px; font-weight: bold; color: #1E293B; cursor: pointer; word-wrap: break-word;}
+        .task-title.completed { text-decoration: line-through; color: #94A3B8; }
+        .tags { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; margin-top: 8px;}
+        .tag { padding: 4px 10px; border-radius: 12px; font-size: 12px; font-weight: bold; }
+        .tag-time { color: #64748B; font-size: 13px; }
+        .actions { display: flex; gap: 6px; }
+        .actions button { background: #F8FAFC; border: none; border-radius: 8px; width: 38px; height: 38px; font-size: 16px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
 
-      /* 彈窗 */
-      .modal-overlay {
-        display: none;
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0, 0, 0, 0.5);
-        z-index: 100;
-        justify-content: center;
-        align-items: center;
-        padding: 15px;
-        box-sizing: border-box;
-      }
-      .modal-content {
-        width: 100%;
-        max-width: 450px;
-        margin: auto;
-      }
-      .modal-title {
-        font-size: 20px;
-        font-weight: bold;
-        color: #2d3748;
-        margin-bottom: 5px;
-      }
-      .btn-cancel {
-        background-color: #e2e8f0;
-        color: #333333;
-        margin-top: 5px;
-      }
+        /* 彈窗 */
+        .modal-overlay { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0, 0, 0, 0.5); z-index: 100; justify-content: center; align-items: center; padding: 15px; box-sizing: border-box; }
+        .modal-content { width: 100%; max-width: 450px; margin: auto; }
+        .modal-title { font-size: 20px; font-weight: bold; color: #2D3748; margin-bottom: 5px; }
+        .btn-cancel { background-color: #E2E8F0; color: #333333; margin-top: 5px; }
     </style>
-  </head>
-  <body>
+</head>
+<body>
+
     <div class="header">
-      <span>任務管理系統</span>
-      <div class="user-info" id="userInfo" style="display: none">
-        <span id="userName"></span>
-        <button class="btn-logout" id="btnLogout">登出</button>
-      </div>
+        <span>任務管理系統</span>
+        <div class="user-info" id="userInfo" style="display: none;">
+            <span id="userName"></span>
+            <button class="btn-sync" id="btnCopyUID">📋 複製同步碼</button>
+            <button class="btn-logout" id="btnLogout">登出</button>
+        </div>
     </div>
 
     <div class="container" id="loginScreen">
-      <h2>歡迎使用</h2>
-      <p style="color: #64748b; margin-bottom: 30px">
-        請先登入以同步您的任務資料
-      </p>
-      <button class="btn-google" id="btnLogin">🔑 使用 Google 帳號登入</button>
+        <h2>歡迎使用</h2>
+        <p style="color: #64748B; margin-bottom: 30px;">請先登入以同步您的任務資料</p>
+        <button class="btn-google" id="btnLogin">🔑 使用 Google 帳號登入</button>
     </div>
 
     <div class="container" id="appScreen">
-      <div class="input-card">
-        <input type="text" id="addContent" placeholder="新增任務..." />
-        <div class="row">
-          <select id="addCategory" style="flex: 1">
-            <option value="一般">一般</option>
-            <option value="工作">工作</option>
-            <option value="生活">生活</option>
-            <option value="學習">學習</option>
-            <option value="健康" selected>健康</option>
-          </select>
-          <select id="addPriority" style="flex: 1">
-            <option value="高">高</option>
-            <option value="中" selected>中</option>
-            <option value="低">低</option>
-          </select>
+        <div class="input-card">
+            <input type="text" id="addContent" placeholder="新增任務...">
+            <div class="row">
+                <select id="addCategory" style="flex: 1;">
+                    <option value="一般">一般</option><option value="工作">工作</option>
+                    <option value="生活">生活</option><option value="學習">學習</option><option value="健康" selected>健康</option>
+                </select>
+                <select id="addPriority" style="flex: 1;">
+                    <option value="高">高</option><option value="中" selected>中</option><option value="低">低</option>
+                </select>
+            </div>
+            <input type="datetime-local" id="addTime">
+            <button class="btn-main" onclick="addTask()">新增任務</button>
         </div>
-        <input type="datetime-local" id="addTime" />
-        <button class="btn-main" onclick="addTask()">新增任務</button>
-      </div>
 
-      <div class="task-list" id="taskList">
-        <div style="text-align: center; color: #94a3b8; margin-top: 20px">
-          任務將從雲端同步...
+        <div class="task-list" id="taskList">
+            <div style="text-align: center; color: #94A3B8; margin-top: 20px;">任務將從雲端同步...</div>
         </div>
-      </div>
     </div>
 
     <div id="editModal" class="modal-overlay">
-      <div class="modal-content">
-        <div class="modal-title">📝 編輯任務詳情</div>
-        <label style="font-size: 14px; color: #4a5568">任務內容</label>
-        <input type="text" id="editContent" />
-        <div class="row">
-          <select id="editCategory" style="flex: 1">
-            <option value="一般">一般</option>
-            <option value="工作">工作</option>
-            <option value="生活">生活</option>
-            <option value="學習">學習</option>
-            <option value="健康">健康</option>
-          </select>
-          <select id="editPriority" style="flex: 1">
-            <option value="高">高</option>
-            <option value="中">中</option>
-            <option value="低">低</option>
-          </select>
+        <div class="modal-content">
+            <div class="modal-title">📝 編輯任務詳情</div>
+            <label style="font-size: 14px; color: #4A5568;">任務內容</label>
+            <input type="text" id="editContent">
+            <div class="row">
+                <select id="editCategory" style="flex: 1;">
+                    <option value="一般">一般</option><option value="工作">工作</option>
+                    <option value="生活">生活</option><option value="學習">學習</option><option value="健康">健康</option>
+                </select>
+                <select id="editPriority" style="flex: 1;">
+                    <option value="高">高</option><option value="中">中</option><option value="低">低</option>
+                </select>
+            </div>
+            <label style="font-size: 14px; color: #4A5568;">⏰ 鬧鐘提醒時間</label>
+            <input type="datetime-local" id="editTime">
+            <button class="btn-main" onclick="saveEdit()">儲存變更</button>
+            <button class="btn-main btn-cancel" onclick="closeEditModal()">取消</button>
         </div>
-        <label style="font-size: 14px; color: #4a5568">⏰ 鬧鐘提醒時間</label>
-        <input type="datetime-local" id="editTime" />
-        <button class="btn-main" onclick="saveEdit()">儲存變更</button>
-        <button class="btn-main btn-cancel" onclick="closeEditModal()">
-          取消
-        </button>
-      </div>
     </div>
 
     <script type="module">
-      import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import {
-        getAuth,
-        signInWithPopup,
-        GoogleAuthProvider,
-        signOut,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
+        import { getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged } 
+        from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-      // ==========================================
-      // 🚨 1. 請填入你的 Firebase 設定
-      // ==========================================
-      const firebaseConfig = {
-        apiKey: "AIzaSyDSFt_TgniiOuv3_y-A62hSZ_q-cxGx90U",
-        authDomain: "calendar-400ce.firebaseapp.com",
-        projectId: "calendar-400ce",
-        storageBucket: "calendar-400ce.firebasestorage.app",
-        messagingSenderId: "965942149317",
-        appId: "1:965942149317:web:ccef715420c0f5a12e70ac",
-      };
+        // ==========================================
+        // 🚨 1. 請填入你的 Firebase 設定
+        // ==========================================
+        const firebaseConfig = {
+            apiKey: "這裡放你的真實apiKey",
+            authDomain: "你的專案名稱.firebaseapp.com",
+            projectId: "你的專案名稱",
+            storageBucket: "你的專案名稱.appspot.com",
+            messagingSenderId: "1234567890",
+            appId: "1:1234567890:web:abcdefg"
+        };
 
-      // ==========================================
-      // 🚨 2. 請填入你「重新部署後」拿到有 /exec 結尾的 GAS 網址
-      // ==========================================
-      const GAS_API_URL =
-        "https://script.google.com/macros/s/AKfycbwvYsXf_AQ55AanxcjCfYTzsASRgnqMqZltBxqDY_H8zKZ-aeuRDYaNRnxw0r21sXZd/exec";
+        // ==========================================
+        // 🚨 2. 請填入你「重新部署後」拿到有 /exec 結尾的 GAS 網址
+        // ==========================================
+        const GAS_API_URL = "https://script.google.com/macros/s/AKfycbwvYsXf_AQ55AanxcjCfYTzsASRgnqMqZltBxqDY_H8zKZ-aeuRDYaNRnxw0r21sXZd/exec";
 
-      let currentUID = null;
-      let tasks = [];
-      let currentEditId = null;
+        let currentUID = null;
+        let tasks = [];
+        let currentEditId = null;
 
-      const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const provider = new GoogleAuthProvider();
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const provider = new GoogleAuthProvider();
 
-      document
-        .getElementById("btnLogin")
-        .addEventListener("click", () => signInWithPopup(auth, provider));
-      document
-        .getElementById("btnLogout")
-        .addEventListener("click", () => signOut(auth));
+        document.getElementById('btnLogin').addEventListener('click', () => signInWithPopup(auth, provider));
+        document.getElementById('btnLogout').addEventListener('click', () => signOut(auth));
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          document.getElementById("loginScreen").style.display = "none";
-          document.getElementById("appScreen").style.display = "block";
-          document.getElementById("userInfo").style.display = "flex";
-          document.getElementById("userName").textContent = user.displayName;
-          currentUID = user.uid;
-          fetchTasksFromCloud();
-          setInterval(checkAlarms, 10000);
-        } else {
-          document.getElementById("loginScreen").style.display = "flex";
-          document.getElementById("appScreen").style.display = "none";
-          document.getElementById("userInfo").style.display = "none";
-          currentUID = null;
-          tasks = [];
-        }
-      });
-
-      async function fetchTasksFromCloud() {
-        if (!currentUID) return;
-        document.getElementById("taskList").innerHTML =
-          '<div style="text-align:center; color:#94A3B8; padding: 20px;">資料同步中，請稍候...</div>';
-        try {
-          const response = await fetch(`${GAS_API_URL}?uid=${currentUID}`);
-          const result = await response.json();
-          if (result.status === "success") {
-            tasks = result.data;
-            renderTasks();
-          }
-        } catch (error) {
-          console.error("連線錯誤:", error);
-        }
-      }
-
-      async function syncToCloud(action, payload) {
-        if (!currentUID) return;
-        try {
-          const requestData = { uid: currentUID, action: action, ...payload };
-          await fetch(GAS_API_URL, {
-            method: "POST",
-            body: JSON.stringify(requestData),
-          });
-        } catch (error) {
-          console.error("同步失敗:", error);
-        }
-      }
-
-      const catColors = {
-        一般: "#F1F5F9",
-        工作: "#E0F2FE",
-        生活: "#FEF3C7",
-        學習: "#F3E8FF",
-        健康: "#DCFCE7",
-      };
-      const catText = {
-        一般: "#475569",
-        工作: "#0369A1",
-        生活: "#B45309",
-        學習: "#7E22CE",
-        健康: "#15803D",
-      };
-      const pColors = { 高: "#FEE2E2", 中: "#FFEDD5", 低: "#F0FDF4" };
-      const pText = { 高: "#B91C1C", 中: "#C2410C", 低: "#15803D" };
-
-      function renderTasks() {
-        const list = document.getElementById("taskList");
-        list.innerHTML = "";
-        if (tasks.length === 0) {
-          list.innerHTML =
-            '<div style="text-align:center; color:#94A3B8; padding: 20px;">目前沒有任務，快來新增一個吧！</div>';
-          return;
-        }
-        let sortedTasks = [...tasks].sort((a, b) => {
-          const pMap = { 高: 1, 中: 2, 低: 3 };
-          if (pMap[a.priority] !== pMap[b.priority])
-            return pMap[a.priority] - pMap[b.priority];
-          return Number(b.id) - Number(a.id);
+        // 新增：顯示並複製同步碼邏輯
+        document.getElementById('btnCopyUID').addEventListener('click', () => {
+            if (currentUID) {
+                if (navigator.clipboard && navigator.clipboard.writeText) {
+                    navigator.clipboard.writeText(currentUID).then(() => {
+                        alert(`已成功複製雲端同步碼！\n\n您的同步碼 (UID) 為：\n${currentUID}\n\n請直接貼至電腦版即可連線同步。`);
+                    }).catch(() => {
+                        prompt("您的雲端同步碼 (UID) 如下，請手動複製：", currentUID);
+                    });
+                } else {
+                    prompt("您的雲端同步碼 (UID) 如下，請手動複製：", currentUID);
+                }
+            } else {
+                alert("請先登入帳號！");
+            }
         });
 
-        sortedTasks.forEach((task) => {
-          let timeStr = task.time ? task.time.replace("T", " ") : "";
-          let pIcon =
-            task.priority === "高"
-              ? "🔥"
-              : task.priority === "中"
-                ? "⚡"
-                : "🌱";
-          let titleClass = task.is_completed
-            ? "task-title completed"
-            : "task-title";
+        onAuthStateChanged(auth, (user) => {
+            if (user) {
+                document.getElementById('loginScreen').style.display = 'none';
+                document.getElementById('appScreen').style.display = 'block';
+                document.getElementById('userInfo').style.display = 'flex';
+                document.getElementById('userName').textContent = user.displayName;
+                currentUID = user.uid; 
+                fetchTasksFromCloud(); 
+                setInterval(checkAlarms, 10000);
+            } else {
+                document.getElementById('loginScreen').style.display = 'flex';
+                document.getElementById('appScreen').style.display = 'none';
+                document.getElementById('userInfo').style.display = 'none';
+                currentUID = null;
+                tasks = [];
+            }
+        });
 
-          const card = document.createElement("div");
-          card.className = "task-card";
-          card.innerHTML = `
+        async function fetchTasksFromCloud() {
+            if (!currentUID) return;
+            document.getElementById('taskList').innerHTML = '<div style="text-align:center; color:#94A3B8; padding: 20px;">資料同步中，請稍候...</div>';
+            try {
+                const response = await fetch(`${GAS_API_URL}?uid=${currentUID}`);
+                const result = await response.json();
+                if (result.status === 'success') {
+                    tasks = result.data; 
+                    renderTasks();       
+                }
+            } catch (error) { console.error("連線錯誤:", error); }
+        }
+
+        async function syncToCloud(action, payload) {
+            if (!currentUID) return;
+            try {
+                const requestData = { uid: currentUID, action: action, ...payload };
+                await fetch(GAS_API_URL, { method: 'POST', body: JSON.stringify(requestData) });
+            } catch (error) { console.error("同步失敗:", error); }
+        }
+
+        const catColors = {"一般": "#F1F5F9", "工作": "#E0F2FE", "生活": "#FEF3C7", "學習": "#F3E8FF", "健康": "#DCFCE7"};
+        const catText = {"一般": "#475569", "工作": "#0369A1", "生活": "#B45309", "學習": "#7E22CE", "健康": "#15803D"};
+        const pColors = {"高": "#FEE2E2", "中": "#FFEDD5", "低": "#F0FDF4"};
+        const pText = {"高": "#B91C1C", "中": "#C2410C", "低": "#15803D"};
+
+        function renderTasks() {
+            const list = document.getElementById('taskList');
+            list.innerHTML = ''; 
+            if (tasks.length === 0) {
+                list.innerHTML = '<div style="text-align:center; color:#94A3B8; padding: 20px;">目前沒有任務，快來新增一個吧！</div>';
+                return;
+            }
+            let sortedTasks = [...tasks].sort((a, b) => {
+                const pMap = {"高": 1, "中": 2, "低": 3};
+                if (pMap[a.priority] !== pMap[b.priority]) return pMap[a.priority] - pMap[b.priority];
+                return Number(b.id) - Number(a.id); 
+            });
+
+            sortedTasks.forEach(task => {
+                let timeStr = task.time ? task.time.replace('T', ' ') : "";
+                let pIcon = task.priority === "高" ? "🔥" : (task.priority === "中" ? "⚡" : "🌱");
+                let titleClass = task.is_completed ? "task-title completed" : "task-title";
+
+                const card = document.createElement('div');
+                card.className = 'task-card';
+                card.innerHTML = `
                     <div class="task-info">
                         <div class="${titleClass}" onclick="toggleComplete('${task.id}')">${task.content}</div>
                         <div class="tags">
@@ -431,94 +233,92 @@
                         <button onclick="deleteTask('${task.id}')" style="color:#E53E3E;">🗑️</button>
                     </div>
                 `;
-          list.appendChild(card);
-        });
-      }
+                list.appendChild(card);
+            });
+        }
 
-      window.addTask = function () {
-        const content = document.getElementById("addContent").value.trim();
-        if (!content) return alert("請輸入任務內容！");
+        window.addTask = function() {
+            const content = document.getElementById('addContent').value.trim();
+            if (!content) return alert("請輸入任務內容！");
 
-        const newTask = {
-          id: new Date().getTime().toString(),
-          content: content,
-          category: document.getElementById("addCategory").value,
-          priority: document.getElementById("addPriority").value,
-          time: document.getElementById("addTime").value,
-          is_completed: false,
+            const newTask = {
+                id: new Date().getTime().toString(),
+                content: content,
+                category: document.getElementById('addCategory').value,
+                priority: document.getElementById('addPriority').value,
+                time: document.getElementById('addTime').value,
+                is_completed: false
+            };
+
+            tasks.push(newTask);
+            renderTasks();
+            document.getElementById('addContent').value = ''; 
+            document.getElementById('addTime').value = ''; 
+
+            syncToCloud('ADD', { task: newTask });
         };
 
-        tasks.push(newTask);
-        renderTasks();
-        document.getElementById("addContent").value = "";
-        document.getElementById("addTime").value = "";
-
-        syncToCloud("ADD", { task: newTask });
-      };
-
-      window.deleteTask = function (id) {
-        if (confirm("確定要刪除嗎？")) {
-          tasks = tasks.filter((t) => t.id !== id);
-          renderTasks();
-          syncToCloud("DELETE", { taskId: id });
-        }
-      };
-
-      window.toggleComplete = function (id) {
-        let task = tasks.find((t) => t.id === id);
-        if (task) {
-          task.is_completed = !task.is_completed;
-          renderTasks();
-          syncToCloud("UPDATE", {
-            task: { id: id, is_completed: task.is_completed },
-          });
-        }
-      };
-
-      window.openEditModal = function (id) {
-        let task = tasks.find((t) => t.id === id);
-        if (!task) return;
-        currentEditId = id;
-        document.getElementById("editContent").value = task.content;
-        document.getElementById("editCategory").value = task.category;
-        document.getElementById("editPriority").value = task.priority;
-        document.getElementById("editTime").value = task.time;
-        document.getElementById("editModal").style.display = "flex";
-      };
-
-      window.closeEditModal = function () {
-        document.getElementById("editModal").style.display = "none";
-        currentEditId = null;
-      };
-
-      window.saveEdit = function () {
-        let task = tasks.find((t) => t.id === currentEditId);
-        if (task) {
-          task.content = document.getElementById("editContent").value.trim();
-          task.category = document.getElementById("editCategory").value;
-          task.priority = document.getElementById("editPriority").value;
-          task.time = document.getElementById("editTime").value;
-          renderTasks();
-          syncToCloud("UPDATE", { task: task });
-        }
-        closeEditModal();
-      };
-
-      function checkAlarms() {
-        let now = new Date();
-        now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
-        let currentLocalTime = now.toISOString().slice(0, 16);
-        tasks.forEach((task) => {
-          if (!task.is_completed && task.time === currentLocalTime) {
-            if (!task.alarm_triggered) {
-              alert(`⏰ 任務提醒：\n${task.content}\n請即時處理。`);
-              task.alarm_triggered = true;
+        window.deleteTask = function(id) {
+            if (confirm("確定要刪除嗎？")) {
+                tasks = tasks.filter(t => t.id !== id);
+                renderTasks();
+                syncToCloud('DELETE', { taskId: id });
             }
-          } else if (task.time !== currentLocalTime) {
-            task.alarm_triggered = false;
-          }
-        });
-      }
+        };
+
+        window.toggleComplete = function(id) {
+            let task = tasks.find(t => t.id === id);
+            if(task) {
+                task.is_completed = !task.is_completed;
+                renderTasks();
+                syncToCloud('UPDATE', { task: { id: id, is_completed: task.is_completed } });
+            }
+        };
+
+        window.openEditModal = function(id) {
+            let task = tasks.find(t => t.id === id);
+            if(!task) return;
+            currentEditId = id;
+            document.getElementById('editContent').value = task.content;
+            document.getElementById('editCategory').value = task.category;
+            document.getElementById('editPriority').value = task.priority;
+            document.getElementById('editTime').value = task.time;
+            document.getElementById('editModal').style.display = 'flex';
+        };
+
+        window.closeEditModal = function() {
+            document.getElementById('editModal').style.display = 'none';
+            currentEditId = null;
+        };
+
+        window.saveEdit = function() {
+            let task = tasks.find(t => t.id === currentEditId);
+            if(task) {
+                task.content = document.getElementById('editContent').value.trim();
+                task.category = document.getElementById('editCategory').value;
+                task.priority = document.getElementById('editPriority').value;
+                task.time = document.getElementById('editTime').value;
+                renderTasks();
+                syncToCloud('UPDATE', { task: task });
+            }
+            closeEditModal();
+        };
+
+        function checkAlarms() {
+            let now = new Date();
+            now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
+            let currentLocalTime = now.toISOString().slice(0,16); 
+            tasks.forEach(task => {
+                if (!task.is_completed && task.time === currentLocalTime) {
+                    if (!task.alarm_triggered) {
+                        alert(`⏰ 任務提醒：\n${task.content}\n請即時處理。`);
+                        task.alarm_triggered = true; 
+                    }
+                } else if (task.time !== currentLocalTime) {
+                    task.alarm_triggered = false; 
+                }
+            });
+        }
     </script>
-  </body>
+</body>
 </html>
