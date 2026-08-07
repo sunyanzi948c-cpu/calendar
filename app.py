@@ -108,6 +108,8 @@ def alarm_monitor():
             
         time.sleep(10)
 
+        
+
 # --- 3. 完整編輯彈窗 ---
 class EditDialog(ctk.CTkToplevel):
     def __init__(self, parent, current_content, current_priority, current_category, current_time, current_time2=""):
@@ -268,6 +270,7 @@ class TodoApp(ctk.CTk):
         self.header = ctk.CTkFrame(self, fg_color="#2D3748", height=85, corner_radius=0)
         self.header.pack(fill="x")
         ctk.CTkLabel(self.header, text="任務管理中心 (雲端同步中)", font=("Microsoft JhengHei", 24, "bold"), text_color="white").place(relx=0.05, rely=0.5, anchor="w")
+        ctk.CTkButton(self.header, text="🔄 同步", width=70, fg_color="#4A5568", command=self.fetch_tasks).place(relx=0.72, rely=0.5, anchor="e")
         ctk.CTkButton(self.header, text="⚙️ 切換帳號", width=110, fg_color="#4A5568", command=self.change_uid).place(relx=0.82, rely=0.5, anchor="e")
         ctk.CTkButton(self.header, text="📥 縮小", width=70, fg_color="#4A5568", command=self.minimize_to_tray).place(relx=0.95, rely=0.5, anchor="e")
 

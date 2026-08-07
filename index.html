@@ -216,6 +216,9 @@
       <span>任務管理系統</span>
       <div class="user-info" id="userInfo" style="display: none">
         <span id="userName"></span>
+
+        <button class="btn-sync" id="btnSyncWeb" style="background: #4A5568;">🔄 同步</button>
+
         <button class="btn-sync" id="btnCopyUID">📋 複製同步碼</button>
         <button class="btn-logout" id="btnLogout">登出</button>
       </div>
@@ -341,7 +344,14 @@
           alert("請先登入帳號！");
         }
       });
-
+      
+      // 新增：網頁版手動同步按鈕邏輯
+      document.getElementById("btnSyncWeb").addEventListener("click", () => {
+        if (currentUID) {
+          fetchTasksFromCloud();
+        }
+      });
+      
       onAuthStateChanged(auth, (user) => {
         if (user) {
           document.getElementById("loginScreen").style.display = "none";
