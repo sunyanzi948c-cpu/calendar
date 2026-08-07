@@ -6,6 +6,9 @@
       name="viewport"
       content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>任務管理系統 APP</title>
+    <link rel="manifest" href="manifest.json" />
+    <meta name="theme-color" content="#2D3748" />
+    <link rel="apple-touch-icon" href="icon-192.png" />
     <style>
       body {
         background-color: #f0f2f5;
@@ -657,6 +660,25 @@
           } else if (t1 !== currentLocalTime && t2 !== currentLocalTime) {
             task.alarm_triggered = false;
           }
+        });
+      }
+
+      // ... 前面是 checkAlarms 函數 ...
+
+      // 👇 新增：註冊 Service Worker (PWA 核心) 👇
+      if ("serviceWorker" in navigator) {
+        window.addEventListener("load", () => {
+          navigator.serviceWorker
+            .register("sw.js")
+            .then((registration) => {
+              console.log(
+                "PWA ServiceWorker 註冊成功！範圍:",
+                registration.scope,
+              );
+            })
+            .catch((err) => {
+              console.log("PWA ServiceWorker 註冊失敗:", err);
+            });
         });
       }
     </script>
