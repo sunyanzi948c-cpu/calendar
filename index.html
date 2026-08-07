@@ -36,7 +36,6 @@
         gap: 8px;
       }
 
-      /* 新增：同步碼按鈕樣式 */
       .btn-sync {
         background: #3182ce;
         color: white;
@@ -47,9 +46,7 @@
         font-size: 13px;
         font-weight: bold;
       }
-      .btn-sync:hover {
-        background: #2b6cb0;
-      }
+      .btn-sync:hover { background: #2b6cb0; }
 
       .btn-logout {
         background: #e53e3e;
@@ -61,9 +58,7 @@
         font-size: 13px;
       }
 
-      .container {
-        padding: 15px;
-      }
+      .container { padding: 15px; }
 
       /* 登入畫面 */
       #loginScreen {
@@ -85,13 +80,10 @@
         cursor: pointer;
         box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
       }
-      #appScreen {
-        display: none;
-      }
+      #appScreen { display: none; }
 
       /* 元件 UI */
-      .input-card,
-      .modal-content {
+      .input-card, .modal-content {
         background: white;
         border-radius: 12px;
         padding: 15px;
@@ -100,9 +92,7 @@
         flex-direction: column;
         gap: 12px;
       }
-      input[type="text"],
-      input[type="datetime-local"],
-      select {
+      input[type="text"], input[type="datetime-local"], select {
         width: 100%;
         padding: 12px;
         border: 1px solid #d1d5db;
@@ -112,10 +102,7 @@
         background-color: #f8fafc;
         color: #333;
       }
-      .row {
-        display: flex;
-        gap: 10px;
-      }
+      .row { display: flex; gap: 10px; }
       .btn-main {
         background-color: #4a5568;
         color: white;
@@ -172,14 +159,8 @@
         font-size: 12px;
         font-weight: bold;
       }
-      .tag-time {
-        color: #64748b;
-        font-size: 13px;
-      }
-      .actions {
-        display: flex;
-        gap: 6px;
-      }
+      .tag-time { color: #64748b; font-size: 13px; }
+      .actions { display: flex; gap: 6px; }
       .actions button {
         background: #f8fafc;
         border: none;
@@ -197,10 +178,7 @@
       .modal-overlay {
         display: none;
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
+        top: 0; left: 0; width: 100%; height: 100%;
         background: rgba(0, 0, 0, 0.5);
         z-index: 100;
         justify-content: center;
@@ -223,6 +201,13 @@
         background-color: #e2e8f0;
         color: #333333;
         margin-top: 5px;
+      }
+      /* 防止 checkbox 被拉寬 */
+      input[type="checkbox"] {
+        width: 20px;
+        height: 20px;
+        accent-color: #4a5568;
+        cursor: pointer;
       }
     </style>
   </head>
@@ -293,26 +278,31 @@
         </div>
         <label style="font-size: 14px; color: #4a5568">⏰ 鬧鐘提醒時間</label>
         <input type="datetime-local" id="editTime" />
-        <button class="btn-main" onclick="saveEdit()">儲存變更</button>
-        <button class="btn-main btn-cancel" onclick="closeEditModal()">
-          取消
-        </button>
+        
+        <div style="display: flex; align-items: center; gap: 8px; margin-top: 5px;">
+            <input type="checkbox" id="editEnableTime2" />
+            <label for="editEnableTime2" style="font-size: 14px; color: #4a5568; cursor: pointer;">🔁 啟用再次提醒，於</label>
+            <select id="editTime2Minutes" style="width: 80px; padding: 8px;">
+                <option value="5">5</option>
+                <option value="10" selected>10</option>
+                <option value="15">15</option>
+                <option value="30">30</option>
+                <option value="60">60</option>
+            </select>
+            <span style="font-size: 14px; color: #4a5568">分鐘後</span>
+        </div>
+
+        <button class="btn-main" onclick="saveEdit()" style="margin-top: 10px;">儲存變更</button>
+        <button class="btn-main btn-cancel" onclick="closeEditModal()">取消</button>
       </div>
     </div>
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import {
-        getAuth,
-        signInWithPopup,
-        GoogleAuthProvider,
-        signOut,
-        onAuthStateChanged,
+        getAuth, signInWithPopup, GoogleAuthProvider, signOut, onAuthStateChanged,
       } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
-      // ==========================================
-      // 🚨 1. 請填入你的 Firebase 設定
-      // ==========================================
       const firebaseConfig = {
         apiKey: "AIzaSyDSFt_TgniiOuv3_y-A62hSZ_q-cxGx90U",
         authDomain: "calendar-400ce.firebaseapp.com",
@@ -322,9 +312,6 @@
         appId: "1:965942149317:web:ccef715420c0f5a12e70ac",
       };
 
-      // ==========================================
-      // 🚨 2. 請填入你「重新部署後」拿到有 /exec 結尾的 GAS 網址
-      // ==========================================
       const GAS_API_URL =
         "https://script.google.com/macros/s/AKfycbwvYsXf_AQ55AanxcjCfYTzsASRgnqMqZltBxqDY_H8zKZ-aeuRDYaNRnxw0r21sXZd/exec";
 
@@ -336,25 +323,15 @@
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
 
-      document
-        .getElementById("btnLogin")
-        .addEventListener("click", () => signInWithPopup(auth, provider));
-      document
-        .getElementById("btnLogout")
-        .addEventListener("click", () => signOut(auth));
+      document.getElementById("btnLogin").addEventListener("click", () => signInWithPopup(auth, provider));
+      document.getElementById("btnLogout").addEventListener("click", () => signOut(auth));
 
-      // 新增：顯示並複製同步碼邏輯
       document.getElementById("btnCopyUID").addEventListener("click", () => {
         if (currentUID) {
           if (navigator.clipboard && navigator.clipboard.writeText) {
-            navigator.clipboard
-              .writeText(currentUID)
-              .then(() => {
-                alert(
-                  `已成功複製雲端同步碼！\n\n您的同步碼 (UID) 為：\n${currentUID}\n\n請直接貼至電腦版即可連線同步。`,
-                );
-              })
-              .catch(() => {
+            navigator.clipboard.writeText(currentUID).then(() => {
+                alert(`已成功複製雲端同步碼！\n\n您的同步碼 (UID) 為：\n${currentUID}\n\n請直接貼至電腦版即可連線同步。`);
+              }).catch(() => {
                 prompt("您的雲端同步碼 (UID) 如下，請手動複製：", currentUID);
               });
           } else {
@@ -412,20 +389,8 @@
         }
       }
 
-      const catColors = {
-        一般: "#F1F5F9",
-        工作: "#E0F2FE",
-        生活: "#FEF3C7",
-        學習: "#F3E8FF",
-        健康: "#DCFCE7",
-      };
-      const catText = {
-        一般: "#475569",
-        工作: "#0369A1",
-        生活: "#B45309",
-        學習: "#7E22CE",
-        健康: "#15803D",
-      };
+      const catColors = { 一般: "#F1F5F9", 工作: "#E0F2FE", 生活: "#FEF3C7", 學習: "#F3E8FF", 健康: "#DCFCE7" };
+      const catText = { 一般: "#475569", 工作: "#0369A1", 生活: "#B45309", 學習: "#7E22CE", 健康: "#15803D" };
       const pColors = { 高: "#FEE2E2", 中: "#FFEDD5", 低: "#F0FDF4" };
       const pText = { 高: "#B91C1C", 中: "#C2410C", 低: "#15803D" };
 
@@ -439,22 +404,27 @@
         }
         let sortedTasks = [...tasks].sort((a, b) => {
           const pMap = { 高: 1, 中: 2, 低: 3 };
-          if (pMap[a.priority] !== pMap[b.priority])
-            return pMap[a.priority] - pMap[b.priority];
+          if (pMap[a.priority] !== pMap[b.priority]) return pMap[a.priority] - pMap[b.priority];
           return Number(b.id) - Number(a.id);
         });
 
         sortedTasks.forEach((task) => {
-          let timeStr = task.time ? task.time.replace("T", " ") : "";
-          let pIcon =
-            task.priority === "高"
-              ? "🔥"
-              : task.priority === "中"
-                ? "⚡"
-                : "🌱";
-          let titleClass = task.is_completed
-            ? "task-title completed"
-            : "task-title";
+          // 乾淨擷取時間 (移除 T 並只保留到分)
+          let timeStr = task.time ? task.time.substring(0, 16).replace("T", " ") : "";
+          let time2Str = task.time2 ? task.time2.substring(0, 16).replace("T", " ") : "";
+          
+          let timeTag = "";
+          if (timeStr) {
+            timeTag += `⏰ ${timeStr}`;
+            if (time2Str) {
+              // 再次提醒只顯示時間部分 (擷取空白後面的 HH:mm)
+              let t2Only = time2Str.includes(" ") ? time2Str.split(" ")[1] : time2Str;
+              timeTag += `  🔁 ${t2Only}`;
+            }
+          }
+
+          let pIcon = task.priority === "高" ? "🔥" : task.priority === "中" ? "⚡" : "🌱";
+          let titleClass = task.is_completed ? "task-title completed" : "task-title";
 
           const card = document.createElement("div");
           card.className = "task-card";
@@ -464,7 +434,7 @@
                         <div class="tags">
                             <span class="tag" style="background: ${catColors[task.category]}; color: ${catText[task.category]};">${task.category}</span>
                             <span class="tag" style="background: ${pColors[task.priority]}; color: ${pText[task.priority]};">${pIcon} ${task.priority}</span>
-                            ${timeStr ? `<span class="tag-time">⏰ ${timeStr}</span>` : ""}
+                            ${timeTag ? `<span class="tag-time">${timeTag}</span>` : ""}
                         </div>
                     </div>
                     <div class="actions">
@@ -486,6 +456,7 @@
           category: document.getElementById("addCategory").value,
           priority: document.getElementById("addPriority").value,
           time: document.getElementById("addTime").value,
+          time2: "",
           is_completed: false,
         };
 
@@ -516,6 +487,7 @@
         }
       };
 
+      // 打開編輯彈窗時，計算並還原再次提醒的狀態
       window.openEditModal = function (id) {
         let task = tasks.find((t) => t.id === id);
         if (!task) return;
@@ -524,6 +496,21 @@
         document.getElementById("editCategory").value = task.category;
         document.getElementById("editPriority").value = task.priority;
         document.getElementById("editTime").value = task.time;
+        
+        let time2Mins = "10";
+        let isTime2Enabled = false;
+        if (task.time && task.time2) {
+            let t1 = new Date(task.time);
+            let t2 = new Date(task.time2);
+            let diff = Math.round((t2 - t1) / 60000);
+            if (diff > 0 && [5, 10, 15, 30, 60].includes(diff)) {
+                time2Mins = diff.toString();
+                isTime2Enabled = true;
+            }
+        }
+        document.getElementById("editEnableTime2").checked = isTime2Enabled;
+        document.getElementById("editTime2Minutes").value = time2Mins;
+
         document.getElementById("editModal").style.display = "flex";
       };
 
@@ -538,7 +525,22 @@
           task.content = document.getElementById("editContent").value.trim();
           task.category = document.getElementById("editCategory").value;
           task.priority = document.getElementById("editPriority").value;
-          task.time = document.getElementById("editTime").value;
+          
+          let baseTime = document.getElementById("editTime").value;
+          let time2Val = "";
+          
+          // 如果勾選再次提醒，自動推算第二次提醒的精確時間
+          if (baseTime && document.getElementById("editEnableTime2").checked) {
+              let mins = parseInt(document.getElementById("editTime2Minutes").value, 10);
+              let t1 = new Date(baseTime);
+              t1.setMinutes(t1.getMinutes() + mins);
+              t1.setMinutes(t1.getMinutes() - t1.getTimezoneOffset()); // 修正時區偏移
+              time2Val = t1.toISOString().slice(0, 16);
+          }
+          
+          task.time = baseTime;
+          task.time2 = time2Val;
+
           renderTasks();
           syncToCloud("UPDATE", { task: task });
         }
@@ -549,13 +551,16 @@
         let now = new Date();
         now.setMinutes(now.getMinutes() - now.getTimezoneOffset());
         let currentLocalTime = now.toISOString().slice(0, 16);
+        
         tasks.forEach((task) => {
-          if (!task.is_completed && task.time === currentLocalTime) {
+          let matchTime = (task.time === currentLocalTime || task.time2 === currentLocalTime);
+          
+          if (!task.is_completed && matchTime) {
             if (!task.alarm_triggered) {
               alert(`⏰ 任務提醒：\n${task.content}\n請即時處理。`);
               task.alarm_triggered = true;
             }
-          } else if (task.time !== currentLocalTime) {
+          } else if (task.time !== currentLocalTime && task.time2 !== currentLocalTime) {
             task.alarm_triggered = false;
           }
         });
