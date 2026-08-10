@@ -377,7 +377,7 @@
       };
 
       const GAS_API_URL =
-        "https://script.google.com/macros/s/AKfycbwHeIRuYNxgdW9oEhYl8QV8a06UiOxAhG_EFnvMaYqEn2d0y4AxhIs3CzXycolfrJoNnQ/exec";
+        "https://script.google.com/macros/s/AKfycbwsjPDmfJSxLRas-4XVwxsxaTd2XuxkciZOaG1jQ-l5fbiSWPEI2rAJNw11A_j7EaE/exec";
 
       let currentUID = null;
       let tasks = [];
@@ -414,7 +414,7 @@
 
               // 👇 就是加了下面這一行，呼叫您原本寫好的同步函數 👇
               syncToCloud("SAVE_TOKEN", { token: token });
-              
+
             } else {
               alert("無法取得推播憑證，請確認權限設定。");
             }

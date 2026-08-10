@@ -17,7 +17,7 @@ import requests
 # ==========================================
 # 🚨 請填入你的 Google Apps Script (GAS) API 網址
 # ==========================================
-GAS_API_URL = "https://script.google.com/macros/s/AKfycbwvYsXf_AQ55AanxcjCfYTzsASRgnqMqZltBxqDY_H8zKZ-aeuRDYaNRnxw0r21sXZd/exec"
+GAS_API_URL = "https://script.google.com/macros/s/AKfycbwsjPDmfJSxLRas-4XVwxsxaTd2XuxkciZOaG1jQ-l5fbiSWPEI2rAJNw11A_j7EaE/exec"
 
 CONFIG_FILE = "config.json" # 用來記憶 UID 的檔案
 
