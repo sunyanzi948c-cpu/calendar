@@ -38,17 +38,22 @@ messaging.onBackgroundMessage((payload) => {
 self.addEventListener('notificationclick', (event) => {
   event.notification.close(); // 先把通知卡片收起來
   
+  // 👇 針對您的 GitHub Pages 專案目錄進行設定
+  const targetUrl = '/calendar/'; 
+
   // 尋找是否已經有打開的 APP 視窗，有的話直接切換過去，沒有的話開新視窗
   event.waitUntil(
     clients.matchAll({ type: 'window' }).then((windowClients) => {
       for (let i = 0; i < windowClients.length; i++) {
         let client = windowClients[i];
-        if (client.url === '/' && 'focus' in client) {
+        // 💡 修正 1：用 includes 判斷目前的網址是否包含您的專案路徑
+        if (client.url.includes(targetUrl) && 'focus' in client) {
           return client.focus();
         }
       }
+      // 💡 修正 2：如果沒有開啟的視窗，強制開啟子目錄路徑
       if (clients.openWindow) {
-        return clients.openWindow('/');
+        return clients.openWindow(targetUrl);
       }
     })
   );
@@ -59,7 +64,7 @@ self.addEventListener('notificationclick', (event) => {
 // ==========================================
 
 // 👇 注意：版號升級到 v3，強制手機更新最新的 sw.js
-const CACHE_NAME = 'todo-pwa-v6'; 
+const CACHE_NAME = 'todo-pwa-v7'; 
 const urlsToCache = [
   './',
   './index.html',
