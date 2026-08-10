@@ -253,7 +253,10 @@
       <div class="user-info" id="userInfo" style="display: none">
         <span id="userName"></span>
 
-        <button class="btn-sync" id="btnEnablePush" style="background: #D69E2E; color: white;">
+        <button
+          class="btn-sync"
+          id="btnEnablePush"
+          style="background: #d69e2e; color: white">
           🔔 開啟通知
         </button>
 
@@ -362,9 +365,9 @@
       } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
 
       // 👇 新增：匯入 Firebase 推播模組 👇
-      import { 
-        getMessaging, 
-        getToken 
+      import {
+        getMessaging,
+        getToken,
       } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-messaging.js";
 
       const firebaseConfig = {
@@ -377,7 +380,7 @@
       };
 
       const GAS_API_URL =
-        "https://script.google.com/macros/s/AKfycbwsjPDmfJSxLRas-4XVwxsxaTd2XuxkciZOaG1jQ-l5fbiSWPEI2rAJNw11A_j7EaE/exec";
+        "https://script.google.com/macros/s/AKfycbwKp_OTyJjoDO_ZBhFNN77GTOidFj5wdTqzudEvZL34IGVXcF1km_dL2bhirPmmkdPXBg/exec";
 
       let currentUID = null;
       let tasks = [];
@@ -391,41 +394,43 @@
       const messaging = getMessaging(app);
 
       // 👇 新增：點擊開啟通知的邏輯 👇
-      document.getElementById("btnEnablePush").addEventListener("click", async () => {
-        try {
-          // 1. 向使用者要求通知權限 (會跳出瀏覽器詢問視窗)
-          const permission = await Notification.requestPermission();
-          if (permission === "granted") {
-            console.log("通知權限已取得！");
-            
-            // 2. 確定 PWA 的 Service Worker 已經準備好
-            const registration = await navigator.serviceWorker.ready;
-            
-            // 3. 向 Firebase 申請這台設備專屬的 FCM Token
-            const token = await getToken(messaging, {
-              vapidKey: "BHyX0_yrMhx4GlLuhwhx2CNR94HEbxby_S5JYqyVfvPb-fp4-wmQTFykklZvRC3jghcFadPKb93-VOq5FCF4jFI", // 🚨 記得替換！
-              serviceWorkerRegistration: registration
-            });
+      document
+        .getElementById("btnEnablePush")
+        .addEventListener("click", async () => {
+          try {
+            // 1. 向使用者要求通知權限 (會跳出瀏覽器詢問視窗)
+            const permission = await Notification.requestPermission();
+            if (permission === "granted") {
+              console.log("通知權限已取得！");
 
-            if (token) {
-              console.log("✅ 成功取得 FCM Token:", token);
-              alert("通知功能已成功開啟！\n未來的提醒將會發送至此設備。");
-              // TODO：未來我們要把這組 token 傳給 GAS 存起來
+              // 2. 確定 PWA 的 Service Worker 已經準備好
+              const registration = await navigator.serviceWorker.ready;
 
-              // 👇 就是加了下面這一行，呼叫您原本寫好的同步函數 👇
-              syncToCloud("SAVE_TOKEN", { token: token });
+              // 3. 向 Firebase 申請這台設備專屬的 FCM Token
+              const token = await getToken(messaging, {
+                vapidKey:
+                  "BHyX0_yrMhx4GlLuhwhx2CNR94HEbxby_S5JYqyVfvPb-fp4-wmQTFykklZvRC3jghcFadPKb93-VOq5FCF4jFI", // 🚨 記得替換！
+                serviceWorkerRegistration: registration,
+              });
 
+              if (token) {
+                console.log("✅ 成功取得 FCM Token:", token);
+                alert("通知功能已成功開啟！\n未來的提醒將會發送至此設備。");
+                // TODO：未來我們要把這組 token 傳給 GAS 存起來
+
+                // 👇 就是加了下面這一行，呼叫您原本寫好的同步函數 👇
+                syncToCloud("SAVE_TOKEN", { token: token });
+              } else {
+                alert("無法取得推播憑證，請確認權限設定。");
+              }
             } else {
-              alert("無法取得推播憑證，請確認權限設定。");
+              alert("您拒絕了通知權限，無法接收鬧鐘推播喔！");
             }
-          } else {
-            alert("您拒絕了通知權限，無法接收鬧鐘推播喔！");
+          } catch (error) {
+            console.error("推播設定發生錯誤:", error);
+            alert("推播設定發生錯誤，請看 Console 紀錄。");
           }
-        } catch (error) {
-          console.error("推播設定發生錯誤:", error);
-          alert("推播設定發生錯誤，請看 Console 紀錄。");
-        }
-      });
+        });
 
       document
         .getElementById("btnLogin")
