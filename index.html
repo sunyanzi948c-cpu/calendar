@@ -343,6 +343,12 @@
             <option value="中" selected>中</option>
             <option value="低">低</option>
           </select>
+          <select id="addRepeat" style="flex: 1">
+            <option value="none" selected>單次 (不重複)</option>
+            <option value="daily">🔁 每天重複</option>
+            <option value="weekly">🔁 每週重複</option>
+            <option value="monthly">🔁 每月重複</option>
+          </select>
         </div>
         <input type="datetime-local" id="addTime" />
         <button class="btn-main" onclick="addTask()">新增任務</button>
@@ -372,6 +378,12 @@
             <option value="高">高</option>
             <option value="中">中</option>
             <option value="低">低</option>
+          </select>
+          <select id="editRepeat" style="flex: 1">
+            <option value="none">單次 (不重複)</option>
+            <option value="daily">🔁 每天重複</option>
+            <option value="weekly">🔁 每週重複</option>
+            <option value="monthly">🔁 每月重複</option>
           </select>
         </div>
         <label style="font-size: 14px; color: #4a5568">⏰ 鬧鐘提醒時間</label>
@@ -430,7 +442,7 @@
       };
 
       const GAS_API_URL =
-        "https://script.google.com/macros/s/AKfycbzjAlrNju6c_kgGbG190Z-_QvXGJ7R6EtuZLBar4GXf8PY7P9TfuBstfhQie216J5uEmQ/exec";
+        "https://script.google.com/macros/s/AKfycbwl7XDJuBnB0VkFBvz-V4l7aCQZvMS0krpbe6uoJbCipr8V2zwhZWmXdLw5misnpvD7hg/exec";
 
       let currentUID = null;
       let tasks = [];
@@ -678,6 +690,7 @@
           content: content,
           category: document.getElementById("addCategory").value,
           priority: document.getElementById("addPriority").value,
+          repeat: document.getElementById("addRepeat").value, // 👈 1. 讀取新增選單的週期設定
           time: document.getElementById("addTime").value,
           time2: "",
           is_completed: false,
@@ -687,6 +700,7 @@
         renderTasks();
         document.getElementById("addContent").value = "";
         document.getElementById("addTime").value = "";
+        document.getElementById("addRepeat").value = "none"; // 👈 2. 新增完成後，重置選單為「單次」
 
         syncToCloud("ADD", { task: newTask });
       };
@@ -703,6 +717,35 @@
         let task = tasks.find((t) => t.id === id);
         if (task) {
           task.is_completed = !task.is_completed;
+
+          // 🔁 關鍵點：當任務被標記為完成，且該任務有設定「週期重複」與「提醒時間」
+          if (
+            task.is_completed &&
+            task.repeat &&
+            task.repeat !== "none" &&
+            task.time
+          ) {
+            let nextTime = getNextRepeatDate(task.time, task.repeat);
+            let nextTime2 = task.time2
+              ? getNextRepeatDate(task.time2, task.repeat)
+              : "";
+
+            // 自動建立下一次的新任務
+            const nextTask = {
+              id: new Date().getTime().toString(),
+              content: task.content,
+              category: task.category,
+              priority: task.priority,
+              repeat: task.repeat,
+              time: nextTime,
+              time2: nextTime2,
+              is_completed: false,
+            };
+
+            tasks.push(nextTask);
+            syncToCloud("ADD", { task: nextTask }); // 同步新任務至雲端
+          }
+
           renderTasks();
           syncToCloud("UPDATE", {
             task: { id: id, is_completed: task.is_completed },
@@ -718,6 +761,7 @@
         document.getElementById("editContent").value = task.content;
         document.getElementById("editCategory").value = task.category;
         document.getElementById("editPriority").value = task.priority;
+        document.getElementById("editRepeat").value = task.repeat || "none"; // 👈 載入原本的週期設定 (預設 none)
 
         // 👇 終極時間格式修正：強制截斷到 16 位數並補上 'T'
         let formattedTime = task.time
@@ -754,6 +798,7 @@
           task.content = document.getElementById("editContent").value.trim();
           task.category = document.getElementById("editCategory").value;
           task.priority = document.getElementById("editPriority").value;
+          task.repeat = document.getElementById("editRepeat").value; // 👈 儲存使用者修改後的週期設定
 
           let baseTime = document.getElementById("editTime").value;
           let time2Val = "";
@@ -819,6 +864,25 @@
               console.log("PWA ServiceWorker 註冊失敗:", err);
             });
         });
+      }
+
+      // 💡 計算下一次週期時間的工具函數
+      function getNextRepeatDate(dateStr, repeatType) {
+        if (!dateStr) return "";
+        let d = new Date(dateStr.replace(" ", "T"));
+        if (isNaN(d.getTime())) return dateStr;
+
+        if (repeatType === "daily") {
+          d.setDate(d.getDate() + 1); // +1 天
+        } else if (repeatType === "weekly") {
+          d.setDate(d.getDate() + 7); // +7 天
+        } else if (repeatType === "monthly") {
+          d.setMonth(d.getMonth() + 1); // +1 個月
+        }
+
+        // 格式化回 yyyy-MM-ddTHH:mm
+        d.setMinutes(d.getMinutes() - d.getTimezoneOffset());
+        return d.toISOString().slice(0, 16);
       }
     </script>
   </body>
