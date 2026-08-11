@@ -245,6 +245,44 @@
         accent-color: #4a5568;
         cursor: pointer;
       }
+
+      /* 🌙 深色模式專屬樣式 */
+      body.dark-mode {
+        background-color: #1a202c;
+        color: #e2e8f0;
+      }
+      body.dark-mode .header {
+        background-color: #0f172a;
+      }
+      body.dark-mode .input-card,
+      body.dark-mode .task-card,
+      body.dark-mode .modal-content {
+        background-color: #2d3748;
+        border-color: #4a5568;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+      }
+      body.dark-mode .task-title {
+        color: #f8fafc;
+      }
+      body.dark-mode .task-title.completed {
+        color: #718096;
+      }
+      body.dark-mode input[type="text"],
+      body.dark-mode input[type="datetime-local"],
+      body.dark-mode select {
+        background-color: #4a5568;
+        color: #f1f5f9;
+        border-color: #718096;
+      }
+      body.dark-mode .modal-title,
+      body.dark-mode label,
+      body.dark-mode span {
+        color: #e2e8f0 !important;
+      }
+      body.dark-mode .btn-cancel {
+        background-color: #718096;
+        color: white;
+      }
     </style>
   </head>
   <body>
@@ -265,6 +303,12 @@
         </button>
 
         <button class="btn-sync" id="btnCopyUID">📋 複製同步碼</button>
+        <button
+          class="btn-sync"
+          id="btnThemeToggle"
+          style="background: #475569">
+          🌙 暗色
+        </button>
         <button class="btn-logout" id="btnLogout">登出</button>
       </div>
     </div>
@@ -464,6 +508,28 @@
       document.getElementById("btnSyncWeb").addEventListener("click", () => {
         if (currentUID) {
           fetchTasksFromCloud();
+        }
+      });
+
+      // 🌙 深色模式切換與記憶邏輯
+      const btnThemeToggle = document.getElementById("btnThemeToggle");
+
+      // 1. 網頁載入時，檢查上次的設定
+      if (localStorage.getItem("theme") === "dark") {
+        document.body.classList.add("dark-mode");
+        btnThemeToggle.textContent = "☀️ 亮色";
+      }
+
+      // 2. 點擊按鈕時的切換行為
+      btnThemeToggle.addEventListener("click", () => {
+        document.body.classList.toggle("dark-mode");
+
+        if (document.body.classList.contains("dark-mode")) {
+          localStorage.setItem("theme", "dark");
+          btnThemeToggle.textContent = "☀️ 亮色";
+        } else {
+          localStorage.setItem("theme", "light");
+          btnThemeToggle.textContent = "🌙 暗色";
         }
       });
 
