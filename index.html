@@ -276,9 +276,15 @@
       }
       body.dark-mode .modal-title,
       body.dark-mode label,
-      body.dark-mode span {
+      body.dark-mode span:not(.tag) {
         color: #e2e8f0 !important;
       }
+
+      /* 讓深色模式下的「時間文字」稍微亮一點，維持閱讀舒適度 */
+      body.dark-mode .tag-time {
+        color: #cbd5e1 !important;
+      }
+
       body.dark-mode .btn-cancel {
         background-color: #718096;
         color: white;
