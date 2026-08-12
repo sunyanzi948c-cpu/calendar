@@ -64,7 +64,7 @@ self.addEventListener('notificationclick', (event) => {
 // ==========================================
 
 // 👇 注意：版號升級到 v3，強制手機更新最新的 sw.js
-const CACHE_NAME = 'todo-pwa-v13'; 
+const CACHE_NAME = 'todo-pwa-v14'; 
 const urlsToCache = [
   './',
   './index.html',
