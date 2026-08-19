@@ -421,6 +421,7 @@
       import {
         getAuth,
         signInWithRedirect,
+        getRedirectResult,
         GoogleAuthProvider,
         signOut,
         onAuthStateChanged,
@@ -451,6 +452,17 @@
       const app = initializeApp(firebaseConfig);
       const auth = getAuth(app);
       const provider = new GoogleAuthProvider();
+
+      // 👇 2. 加入這段檢查邏輯
+      getRedirectResult(auth)
+        .then((result) => {
+          if (result) {
+            console.log("登入成功回來了！", result.user);
+          }
+        })
+        .catch((error) => {
+          console.error("登入跳轉失敗：", error);
+        });
 
       // 👇 新增：初始化推播模組 👇
       const messaging = getMessaging(app);
