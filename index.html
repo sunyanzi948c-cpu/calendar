@@ -420,7 +420,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import {
         getAuth,
-        signInWithPopup,
+        signInWithRedirect,
         GoogleAuthProvider,
         signOut,
         onAuthStateChanged,
@@ -496,7 +496,7 @@
 
       document
         .getElementById("btnLogin")
-        .addEventListener("click", () => signInWithPopup(auth, provider));
+        .addEventListener("click", () => signInWithRedirect(auth, provider));
       document
         .getElementById("btnLogout")
         .addEventListener("click", () => signOut(auth));
