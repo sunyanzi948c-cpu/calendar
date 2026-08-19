@@ -420,8 +420,7 @@
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
       import {
         getAuth,
-        signInWithRedirect,
-        getRedirectResult,
+        signInWithPopup,
         GoogleAuthProvider,
         signOut,
         onAuthStateChanged,
@@ -505,10 +504,15 @@
             alert("推播設定發生錯誤，請看 Console 紀錄。");
           }
         });
-
-      document
-        .getElementById("btnLogin")
-        .addEventListener("click", () => signInWithRedirect(auth, provider));
+        
+      document.getElementById("btnLogin").addEventListener("click", function(event) {
+          event.preventDefault(); 
+          signInWithPopup(auth, provider).catch(function(error) {
+              console.error("Popup 登入失敗或被攔截：", error);
+              alert("⚠️ 登入視窗遭到阻擋！\n\n請嘗試以下方法：\n1. 檢查是否開啟了「阻擋彈出式視窗」\n2. 如果您是用 LINE 或 FB 內建瀏覽器，請點右上角「用預設瀏覽器開啟 (Safari/Chrome)」再來登入。");
+          });
+      });
+      
       document
         .getElementById("btnLogout")
         .addEventListener("click", () => signOut(auth));
