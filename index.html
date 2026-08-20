@@ -322,9 +322,9 @@
     <div class="container" id="loginScreen">
       <h2>歡迎使用</h2>
       <p style="color: #64748b; margin-bottom: 30px">
-        請先登入以同步您的任務資料
-      </p>
-      <button class="btn-google" id="btnLogin">🔑 使用 Google 帳號登入</button>
+        請輸入或貼上您的專屬同步碼 (UID)
+      </p><input type="text" id="uidInput" placeholder="請輸入 UID..." style="max-width: 300px; margin-bottom: 15px;" />
+      <button class="btn-main" id="btnLogin" style="width: 100%; max-width: 300px;">🚀 連線登入</button>
     </div>
 
     <div class="container" id="appScreen">
@@ -418,13 +418,7 @@
 
     <script type="module">
       import { initializeApp } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-app.js";
-      import {
-        getAuth,
-        signInWithPopup,
-        GoogleAuthProvider,
-        signOut,
-        onAuthStateChanged,
-      } from "https://www.gstatic.com/firebasejs/10.8.0/firebase-auth.js";
+      
 
       // 👇 新增：匯入 Firebase 推播模組 👇
       import {
@@ -449,19 +443,8 @@
       let currentEditId = null;
 
       const app = initializeApp(firebaseConfig);
-      const auth = getAuth(app);
-      const provider = new GoogleAuthProvider();
-
-      // 👇 2. 加入這段檢查邏輯
-      getRedirectResult(auth)
-        .then((result) => {
-          if (result) {
-            console.log("登入成功回來了！", result.user);
-          }
-        })
-        .catch((error) => {
-          console.error("登入跳轉失敗：", error);
-        });
+      
+      
 
       // 👇 新增：初始化推播模組 👇
       const messaging = getMessaging(app);
@@ -505,17 +488,9 @@
           }
         });
         
-      document.getElementById("btnLogin").addEventListener("click", function(event) {
-          event.preventDefault(); 
-          signInWithPopup(auth, provider).catch(function(error) {
-              console.error("Popup 登入失敗或被攔截：", error);
-              alert("⚠️ 登入視窗遭到阻擋！\n\n請嘗試以下方法：\n1. 檢查是否開啟了「阻擋彈出式視窗」\n2. 如果您是用 LINE 或 FB 內建瀏覽器，請點右上角「用預設瀏覽器開啟 (Safari/Chrome)」再來登入。");
-          });
-      });
       
-      document
-        .getElementById("btnLogout")
-        .addEventListener("click", () => signOut(auth));
+      
+      
 
       document.getElementById("btnCopyUID").addEventListener("click", () => {
         if (currentUID) {
@@ -567,21 +542,68 @@
         }
       });
 
-      onAuthStateChanged(auth, (user) => {
-        if (user) {
-          document.getElementById("loginScreen").style.display = "none";
-          document.getElementById("appScreen").style.display = "block";
-          document.getElementById("userInfo").style.display = "flex";
-          document.getElementById("userName").textContent = user.displayName;
-          currentUID = user.uid;
-          fetchTasksFromCloud();
-          setInterval(checkAlarms, 10000);
+      // ==========================================
+      // 🚀 全新 UID 登入與記憶邏輯
+      // ==========================================
+      
+      // 1. 網頁載入時，檢查是否有記憶的 UID
+      window.addEventListener("DOMContentLoaded", () => {
+        const savedUID = localStorage.getItem("my_task_uid");
+        if (savedUID) {
+          loginWithUID(savedUID);
         } else {
           document.getElementById("loginScreen").style.display = "flex";
           document.getElementById("appScreen").style.display = "none";
           document.getElementById("userInfo").style.display = "none";
-          currentUID = null;
-          tasks = [];
+        }
+      });
+
+      // 2. 登入按鈕點擊事件
+      document.getElementById("btnLogin").addEventListener("click", () => {
+        const inputUID = document.getElementById("uidInput").value.trim();
+        if (inputUID) {
+          loginWithUID(inputUID);
+        } else {
+          alert("請輸入 UID！");
+        }
+      });
+
+      // 3. 執行登入並切換畫面
+      function loginWithUID(uid) {
+        currentUID = uid;
+        localStorage.setItem("my_task_uid", uid); // 記憶 UID
+        
+        document.getElementById("loginScreen").style.display = "none";
+        document.getElementById("appScreen").style.display = "block";
+        document.getElementById("userInfo").style.display = "flex";
+        
+        // 將顯示名稱改為 UID 的前幾碼，讓畫面簡潔
+        document.getElementById("userName").textContent = "ID: " + uid.substring(0, 5) + "...";
+        
+        fetchTasksFromCloud();
+        
+        // 確保定時器只會啟動一次
+        if (!window.alarmInterval) {
+            window.alarmInterval = setInterval(checkAlarms, 10000);
+        }
+      }
+
+      // 4. 登出按鈕邏輯 (清除本機記憶)
+      document.getElementById("btnLogout").addEventListener("click", () => {
+        if(confirm("確定要登出並清除本機記憶的同步碼嗎？")) {
+            localStorage.removeItem("my_task_uid");
+            currentUID = null;
+            tasks = [];
+            
+            if (window.alarmInterval) {
+                clearInterval(window.alarmInterval);
+                window.alarmInterval = null;
+            }
+            
+            document.getElementById("loginScreen").style.display = "flex";
+            document.getElementById("appScreen").style.display = "none";
+            document.getElementById("userInfo").style.display = "none";
+            document.getElementById("uidInput").value = "";
         }
       });
 
